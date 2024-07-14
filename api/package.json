@@ -1,0 +1,16 @@
+{
+  "name": "quiz_api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Sim05",
+  "license": "ISC",
+  "description": "",
+  "type": "module",
+  "dependencies": {
+    "pg": "^8.12.0"
+  }
+}
