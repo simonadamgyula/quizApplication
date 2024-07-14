@@ -1,24 +1,23 @@
 import http from "http";
 import { Response } from "./response.js";
 import { handleQuiz } from "./quizHandler.js";
-import { login, register } from "./account.js";
+import { authenticateUser, loginHandler, registerHandler } from "./authentication.js";
 
 http.createServer((req, res) => {
     const url = req.url.substring(1).split("/");
-    console.log(url);
 
     switch (url[0]) {
         case "quiz":
             handleQuiz(req, res, url);
             break;
         case "login":
-            login(req, res, body);
+            loginHandler(req, res);
             break;
         case "register":
-            register(req, res, body);
+            registerHandler(req, res);
             break;
         default:
-            Response.NotFound(res).send("Not found");
+            Response.NotFound(res).send("Not found!");
             break;
     }
 }).listen(3000);

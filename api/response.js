@@ -20,6 +20,10 @@ export class Response {
         this.res.end();
     }
 
+    static Redirect(res, url) {
+        res.writeHead(301, { Location: url});
+    }
+
     static NotFound(res) {
         return new Response(res, 404);
     }

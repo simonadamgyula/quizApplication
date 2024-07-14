@@ -2,6 +2,7 @@ import { Response } from "./response.js";
 import { getBody } from "./index.js";
 import { createQuiz, getQuizByCode } from "./database.js";
 import { questionsHander } from "./questionsHandler.js";
+import { authenticateUser } from "./authentication.js";
 
 export function handleQuiz(req, res, url) {
     if (req.method === "POST") {
@@ -26,7 +27,11 @@ export function handleQuiz(req, res, url) {
     }
 }
 
-function getQuiz(req, res, body) {
+async function getQuiz(req, res, body) {
+    if (!await authenticateUser(req, () => {
+        Response.Unauthorized(res).send("Unauthorized");
+    })) return;
+
     const { code } = body;
 
     getQuizByCode(code)
@@ -35,12 +40,17 @@ function getQuiz(req, res, body) {
         });
 }
 
-function newQuiz(req, res, body) {
+async function newQuiz(req, res, body) {
+    const user_id = await authenticateUser(req, () => {
+        Response.Unauthorized(res).send("Unauthorized");
+    });
+    if (!user_id) return;
+
     const { name } = body;
 
     const code = Math.random().toString().substring(2, 10);
 
-    createQuiz(name, "abc", code)
+    createQuiz(name, user_id, code)
         .then(() => {
             Response.OK(res).send(JSON.stringify("Quiz created"));
         });
