@@ -1,12 +1,9 @@
 import { getBody } from "./index.js";
 import { Response } from "./response.js";
-import { getQuestions, createQuestion, editQuestion } from "./database.js";
+import { getQuestions, createQuestion, editQuestion, deleteQuestion } from "./database.js";
 import { authenticateUser } from "./authentication.js";
 
 export function questionsHander(req, res, url, body) {
-    console.log("handling questions");
-    console.log(url[2] == "get");
-
     switch (url[2]) {
         case "get":
             getQuestionsHandler(req, res, body);
@@ -15,7 +12,7 @@ export function questionsHander(req, res, url, body) {
             createQuestionHandler(req, res, body);
             break;
         case "delete":
-            deleteQuestion(req, res, body);
+            deleteQuestionHandler(req, res, body);
             break;
         case "edit":
             editQuestionHandler(req, res, body);
@@ -53,7 +50,7 @@ function getQuestionsHandler(req, res, body) {
         });
 }
 
-async function deleteQuestion(req, res, body) {
+async function deleteQuestionHandler(req, res, body) {
     const user_id = await authenticateUser(req, () => {
         Response.Unauthorized(res).send("Unauthorized");
     });

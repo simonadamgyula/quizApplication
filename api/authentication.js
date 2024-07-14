@@ -4,9 +4,16 @@ import { getBody } from './index.js';
 import { Response } from './response.js';
 
 
+/**
+ * 
+ * @param {Request} req 
+ * @param {*} onFail 
+ * @param {*} onSuccess 
+ * @returns 
+ */
 export function authenticateUser(req, onFail = () => { }, onSuccess = user_id => { }) {
-    const authentication = req.headers.authorization;
-    const token = authentication ? authentication.split(" ")[1] : "";
+    const authentication = req.headers.authorization || '';
+    const token = authentication.split(" ").pop() || '';
 
     return new Promise((resolve, reject) => {
         authenticate(token).then(user_id => {

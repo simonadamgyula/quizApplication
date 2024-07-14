@@ -5,6 +5,7 @@ import { authenticateUser, loginHandler, registerHandler } from "./authenticatio
 
 http.createServer((req, res) => {
     const url = req.url.substring(1).split("/");
+    console.log(req.url);
 
     switch (url[0]) {
         case "quiz":
