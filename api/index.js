@@ -1,16 +1,21 @@
 import http from "http";
 import { Response } from "./response.js";
 import { handleQuiz } from "./quizHandler.js";
+import { login, register } from "./account.js";
 
 http.createServer((req, res) => {
-    const url = `/${req.url.substring(1).split("/")[0]}`;
+    const url = req.url.substring(1).split("/");
+    console.log(url);
 
-    switch (url) {
-        case "/quiz":
-            handleQuiz(req, res);
+    switch (url[0]) {
+        case "quiz":
+            handleQuiz(req, res, url);
             break;
-        case "/register":
-            Response.OK(res).send("registered");
+        case "login":
+            login(req, res, body);
+            break;
+        case "register":
+            register(req, res, body);
             break;
         default:
             Response.NotFound(res).send("Not found");
@@ -25,7 +30,7 @@ export function getBody(req) {
             body += chunk.toString();
         });
         req.on("end", () => {
-            resolve(body);
+            resolve(JSON.parse(body));
         });
     });
 

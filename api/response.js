@@ -16,7 +16,7 @@ export class Response {
 
     send(body) {
         this.res.writeHead(this.status, this.headers);
-        this.res.write(body);
+        this.res.write(JSON.stringify(body));
         this.res.end();
     }
 
@@ -26,5 +26,9 @@ export class Response {
 
     static OK(res) {
         return new Response(res, 200);
+    }
+
+    static Unauthorized(res) {
+        return new Response(res, 401);
     }
 }

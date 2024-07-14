@@ -1,15 +1,20 @@
 import { Response } from "./response.js";
 import { getBody } from "./index.js";
-import { createQuiz } from "./database.js";
+import { createQuiz, getQuizByCode } from "./database.js";
+import { questionsHander } from "./questionsHandler.js";
 
-export function handleQuiz(req, res) {
-    console.log("quiz handler" + req.method + req.url);
+export function handleQuiz(req, res, url) {
     if (req.method === "POST") {
         getBody(req).then(body => {
-            switch (req.url) {
-                case "/quiz/new":
-                    console.log("new quiz");
+            switch (url[1]) {
+                case "new":
                     newQuiz(req, res, body);
+                    break;
+                case "get":
+                    getQuiz(req, res, body);
+                    break;
+                case "questions":
+                    questionsHander(req, res, url, body);
                     break;
                 default:
                     Response.NotFound(res).send("Not found");
@@ -21,14 +26,22 @@ export function handleQuiz(req, res) {
     }
 }
 
-function newQuiz(req, res, body) {
-    const { name } = JSON.parse(body);
+function getQuiz(req, res, body) {
+    const { code } = body;
 
-    const code = Math.random().toString(36).substring(7);
-    console.log(code);
+    getQuizByCode(code)
+        .then(quiz => {
+            Response.OK(res).send(JSON.stringify(quiz));
+        });
+}
+
+function newQuiz(req, res, body) {
+    const { name } = body;
+
+    const code = Math.random().toString().substring(2, 10);
 
     createQuiz(name, "abc", code)
-        .then(quizId => {
-            Response.OK(res).send(JSON.stringify({ id: quizId }));
+        .then(() => {
+            Response.OK(res).send(JSON.stringify("Quiz created"));
         });
 }
