@@ -36,7 +36,7 @@ async function getAnswer(req, res, body) {
 
     getAnswerById(id, user_id)
         .then(answer => {
-            Response.OK(res).send(JSON.stringify(answer));
+            Response.OK(res).send(answer);
         });
 }
 
@@ -57,7 +57,7 @@ async function getAllAnswers(req, res, body) {
 
     getAnswersByQuestionId(question_id, user_id)
         .then(answers => {
-            Response.OK(res).send(JSON.stringify(answers));
+            Response.OK(res).send(answers);
         });
 }
 
@@ -78,6 +78,6 @@ async function submitAnswerHandler(req, res, body) {
 
     submitAnswer(user_id, question_id, answer, score_earned)
         .then(() => {
-            Response.OK(res).send(JSON.stringify("Answer submitted"));
+            Response.OK(res).send("Answer submitted");
         });
 }

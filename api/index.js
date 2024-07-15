@@ -1,7 +1,7 @@
 import http from "http";
 import { Response } from "./response.js";
 import { handleQuiz } from "./quizHandler.js";
-import { authenticateUser, loginHandler, registerHandler } from "./authentication.js";
+import { loginHandler, registerHandler } from "./authentication.js";
 
 http.createServer((req, res) => {
     const url = req.url.substring(1).split("/");

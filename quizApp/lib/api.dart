@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
-const String apiUrl = "http://localhost:3000";
+const String apiUrl = "http://192.168.1.93:3000";
 
 Future<http.Response> sendApiRequest(String path, Map<String, dynamic> body,
     { String? authToken }) {

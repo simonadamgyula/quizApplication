@@ -3,7 +3,7 @@ import { getBody } from "./index.js";
 import { createQuiz, getQuizByCode } from "./database.js";
 import { questionsHander } from "./questionsHandler.js";
 import { authenticateUser } from "./authentication.js";
-import { answersHandler } from "./answersHandler.js";
+import { answerHandler } from "./answerHandler.js";
 
 export function handleQuiz(req, res, url) {
     if (req.method === "POST") {
@@ -25,7 +25,7 @@ export function handleQuiz(req, res, url) {
                     questionsHander(req, res, url, body);
                     break;
                 case "answers":
-                    answersHandler(req, res, url, body);
+                    answerHandler(req, res, url, body);
                     break;
                 default:
                     Response.NotFound(res).send("Not found");
@@ -46,7 +46,7 @@ async function getQuiz(req, res, body) {
 
     getQuizByCode(code)
         .then(quiz => {
-            Response.OK(res).send(JSON.stringify(quiz));
+            Response.OK(res).send(quiz);
         });
 }
 
@@ -62,7 +62,7 @@ async function newQuiz(req, res, body) {
 
     createQuiz(name, user_id, code)
         .then(() => {
-            Response.OK(res).send(JSON.stringify("Quiz created"));
+            Response.OK(res).send("Quiz created");
         });
 }
 
@@ -76,7 +76,7 @@ async function editQuizHandler(req, res, body) {
 
     editQuiz(user_id, id, name)
         .then(() => {
-            Response.OK(res).send(JSON.stringify("Quiz edited"));
+            Response.OK(res).send("Quiz edited");
         });
 }
 
@@ -90,6 +90,6 @@ async function deleteQuizHandler(req, res, body) {
 
     deleteQuiz(user_id, id)
         .then(() => {
-            Response.OK(res).send(JSON.stringify("Quiz deleted"));
+            Response.OK(res).send("Quiz deleted");
         });
 }

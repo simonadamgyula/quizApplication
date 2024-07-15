@@ -33,13 +33,13 @@ export async function loginHandler(req, res) {
     login(username, password)
         .then(result => {
             if (result) {
-                Response.OK(res).send(JSON.stringify({ token: result }));
+                Response.OK(res).send({ token: result });
             } else {
-                Response.Unauthorized(res).send(JSON.stringify("Login failed"));
+                Response.Unauthorized(res).send("Login failed");
             }
         },
             reason => {
-                Response.Unauthorized(res).send(JSON.stringify("Login failed: " + reason));
+                Response.Unauthorized(res).send("Login failed: " + reason);
             });
 }
 
@@ -52,6 +52,6 @@ export async function registerHandler(req, res) {
 
     register(username, hashedPassword)
         .then(() => {
-            Response.OK(res).send(JSON.stringify("User registered"));
+            Response.OK(res).send("User registered");
         });
 }

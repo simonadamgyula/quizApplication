@@ -1,4 +1,3 @@
-import { getBody } from "./index.js";
 import { Response } from "./response.js";
 import { getQuestions, createQuestion, editQuestion, deleteQuestion } from "./database.js";
 import { authenticateUser } from "./authentication.js";
@@ -34,10 +33,10 @@ async function createQuestionHandler(req, res, body) {
 
     createQuestion(user_id, quiz_id, question, type, options, answer)
         .then(() => {
-            Response.OK(res).send(JSON.stringify("Question created"));
+            Response.OK(res).send("Question created");
         },
             reason => {
-                Response.BadRequest(res).send(JSON.stringify("Question creation failed: " + reason));
+                Response.BadRequest(res).send("Question creation failed: " + reason);
             });
 }
 
@@ -46,7 +45,7 @@ function getQuestionsHandler(req, res, body) {
 
     getQuestions(id)
         .then(questions => {
-            Response.OK(res).send(JSON.stringify(questions));
+            Response.OK(res).send(questions);
         });
 }
 
@@ -60,9 +59,9 @@ async function deleteQuestionHandler(req, res, body) {
 
     deleteQuestion(user_id, id)
         .then(() => {
-            Response.OK(res).send(JSON.stringify("Question deleted"));
+            Response.OK(res).send("Question deleted");
         }, reason => {
-            Response.BadRequest(res).send(JSON.stringify("Question deletion failed: " + reason));
+            Response.BadRequest(res).send("Question deletion failed: " + reason);
         });
 }
 
@@ -76,8 +75,8 @@ async function editQuestionHandler(req, res, body) {
 
     editQuestion(user_id, id, question, type, options, answer)
         .then(() => {
-            Response.OK(res).send(JSON.stringify("Question edited"));
+            Response.OK(res).send("Question edited");
         }, reason => {
-            Response.BadRequest(res).send(JSON.stringify("Question edit failed: " + reason));
+            Response.BadRequest(res).send("Question edit failed: " + reason);
         });
 }
