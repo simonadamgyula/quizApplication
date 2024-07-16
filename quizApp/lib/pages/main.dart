@@ -1,4 +1,9 @@
+import 'dart:developer';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:provider/provider.dart';
@@ -20,36 +25,60 @@ class _HomePageState extends State<HomePage> {
 
   final FocusNode numberNode = FocusNode();
 
-  List<TextEditingController> controllers = [];
-  List<FocusNode> focuses = [];
+  List<TextEditingController?> controllers = [];
+  List<FocusNode?> focuses = [];
 
   @override
   void initState() {
-    for (var _ = 0; _ < 2; _++) {
+    for (var i = 0; i < 8; i++) {
       controllers.add(TextEditingController());
+
+      if (i == 0) {
+        continue;
+      }
       focuses.add(FocusNode());
+      if (i == 3) {
+        controllers.add(null);
+      }
     }
     super.initState();
   }
 
   Future<void> _openQuizCodeDialog(BuildContext context) {
+    bool pastDash = false;
+
     return showDialog(
       context: context,
       builder: (BuildContext context) {
         return SimpleDialog(
+          contentPadding: const EdgeInsets.all(20),
+          backgroundColor: const Color(0xff181b23),
           children: [
-            const Text("Fill out quiz"),
+            const Text(
+              "Fill out quiz",
+              style: TextStyle(color: Colors.white),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: controllers.asMap().entries
-                  .map(
-                      (entry) {
-                        int index = entry.key;
-                        TextEditingController controller = entry.value;
+              children: controllers.asMap().entries.map((entry) {
+                final int index = entry.key - (pastDash ? 1 : 0);
+                final TextEditingController? controller = entry.value;
 
-                        return SingleNumberInput(controller: controller);
-                      })
-                  .toList(),
+                if (controller == null) {
+                  pastDash = true;
+                  return const Text("-", style: TextStyle(color: Colors.white),);
+                }
+
+                FocusNode? current = index == 0 ? null : focuses[index - 1];
+                FocusNode? next =
+                    index == focuses.length ? null : focuses[index];
+
+                return SingleNumberInput(
+                  controller: controller,
+                  focus: current,
+                  nextFocus: next,
+                );
+              }).toList(),
             ),
           ],
         );
@@ -82,7 +111,8 @@ class _HomePageState extends State<HomePage> {
 
                   return Text(session.getToken()!);
                 },
-              )
+              ),
+              SingleNumberInput(controller: TextEditingController()),
             ],
           ),
         ),
@@ -169,16 +199,46 @@ class SingleNumberInput extends StatefulWidget {
 
 class _SingleNumberInputState extends State<SingleNumberInput> {
   @override
+  void initState() {
+    widget.controller.addListener(() {
+      if (widget.nextFocus == null) {
+        return;
+      }
+      widget.nextFocus!.requestFocus();
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 20,
-      height: 50,
+      height: 40,
       child: TextField(
+        focusNode: widget.focus,
+        controller: widget.controller,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        onChanged: (value) {
-          widget.nextFocus?.requestFocus();
-        },
+        decoration: const InputDecoration(
+          counterText: "",
+          contentPadding: EdgeInsets.all(2),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: CupertinoColors.systemGrey4),
+            borderRadius: BorderRadius.all(Radius.circular(5)),
+          ),
+          hintText: "0",
+          hintStyle: TextStyle(color: Colors.white),
+        ),
+        cursorWidth: 0,
+        maxLength: 1,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+        ),
       ),
     );
   }

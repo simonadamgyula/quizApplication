@@ -1,5 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:quiz_app/api.dart';
+
+import '../authentication.dart';
 
 class QuizAddPage extends StatelessWidget {
   const QuizAddPage({super.key});
@@ -16,29 +18,57 @@ class QuizAddPage extends StatelessWidget {
           backgroundColor: const Color(0xff181b23),
           foregroundColor: Colors.white,
         ),
-        body: const QuizCreateForm()
-    );
+        body: QuizCreateForm());
   }
 }
 
 class QuizCreateForm extends StatelessWidget {
-  const QuizCreateForm({super.key});
+  QuizCreateForm({super.key});
+
+  final _formKey = GlobalKey<FormState>();
+  final nameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey,
       child: Column(
         children: [
           TextFormField(
+            controller: nameController,
             decoration: const InputDecoration(
-                labelText: "Name",
-                labelStyle: TextStyle(color: Colors.white)
-            ),
+                labelText: "Name", labelStyle: TextStyle(color: Colors.white)),
             style: const TextStyle(color: Colors.white),
-          )
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return "Please enter a name for the quiz";
+              }
+
+              return null;
+            },
+          ),
+          ElevatedButton(
+              onPressed: () async {
+                if (!_formKey.currentState!.validate()) {
+                  return;
+                }
+                
+                final response = await sendApiRequest("/quiz/new", {"name": nameController.text}, authToken: Session().getToken());
+
+                if (response.statusCode != 200) {
+                  return;
+                }
+
+                if (!context.mounted) return;
+
+                Navigator.pop(context, true);
+              },
+              child: const Text(
+                "Create",
+                style: TextStyle(color: Colors.white),
+              ))
         ],
       ),
     );
   }
-
 }
