@@ -38,7 +38,7 @@ class QuizCreateForm extends StatelessWidget {
           )
         ],
       ),
-    )
+    );
   }
 
 }

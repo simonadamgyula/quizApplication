@@ -38,6 +38,7 @@ dependencies:
   session_storage: ^0.0.1
   http: ^1.2.1
   provider: ^6.1.2
+  flutter_expandable_fab: ^2.1.0
 
 dev_dependencies:
   flutter_test:
