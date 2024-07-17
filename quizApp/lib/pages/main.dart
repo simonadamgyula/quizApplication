@@ -1,13 +1,10 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/pages/login.dart';
+import 'package:quiz_app/pages/quiz.dart';
 
 import '../authentication.dart';
 
@@ -44,6 +41,11 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  void clearCode() {
+    for (var controller in controllers) {
+      controller?.clear();
+    }}
+
   Future<void> _openQuizCodeDialog(BuildContext context) {
     bool pastDash = false;
 
@@ -66,7 +68,10 @@ class _HomePageState extends State<HomePage> {
 
                 if (controller == null) {
                   pastDash = true;
-                  return const Text("-", style: TextStyle(color: Colors.white),);
+                  return const Text(
+                    "-",
+                    style: TextStyle(color: Colors.white),
+                  );
                 }
 
                 FocusNode? current = index == 0 ? null : focuses[index - 1];
@@ -79,6 +84,33 @@ class _HomePageState extends State<HomePage> {
                   nextFocus: next,
                 );
               }).toList(),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    List<String> codeList = controllers.map((controller) {
+                      return controller?.text ?? "";
+                    }).toList();
+                    String code = codeList.join();
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => QuizPage(code: code)),
+                    );
+                  },
+                  child: const Text("Enter"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    clearCode();
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Cancel"),
+                ),
+              ],
             ),
           ],
         );
@@ -112,7 +144,6 @@ class _HomePageState extends State<HomePage> {
                   return Text(session.getToken()!);
                 },
               ),
-              SingleNumberInput(controller: TextEditingController()),
             ],
           ),
         ),
@@ -202,6 +233,7 @@ class _SingleNumberInputState extends State<SingleNumberInput> {
   void initState() {
     widget.controller.addListener(() {
       if (widget.nextFocus == null) {
+        widget.focus?.unfocus();
         return;
       }
       widget.nextFocus!.requestFocus();
