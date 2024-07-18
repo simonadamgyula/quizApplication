@@ -102,7 +102,18 @@ export function getQuestions(quiz_id) {
     return new Promise((resolve, reject) => {
         query('SELECT * FROM questions WHERE quiz_id = $1', [quiz_id])
             .then(result => {
-                resolve(result.rows);
+                const rows = result.rows.map(row => {
+                    return {
+                        id: row.id,
+                        quiz_id: row.quiz_id,
+                        question: row.question,
+                        type: row.type,
+                        options: row.options,
+                        index: row.index
+                    }
+                }
+                )
+                resolve(rows);
             })
             .catch(err => {
                 reject(err);
@@ -363,19 +374,19 @@ export function getAnswersByQuestionId(question_id, user_id) {
 /**
  * 
  * @param {string} user_id 
- * @param {number} question_id 
- * @param {*} answer 
+ * @param {number} quiz_id
+ * @param {*} answers 
  * @param {number} score_earned 
  * @returns {Promise<void>}
  */
-export function submitAnswer(user_id, question_id, answer, score_earned) {
+export function submitAnswer(user_id, quiz_id, answers, score_earned) {
     return new Promise(async (resolve, reject) => {
-        if (!await checkAuthorization(user_id, question_id)) {
+        if (!await checkAuthorization(user_id, quiz_id)) {
             reject("Unauthorized");
             return;
         }
 
-        query('INSERT INTO answers (user_id, question_id, answer, score_earned) VALUES ($1, $2, $3, $4)', [user_id, question_id, answer, score_earned])
+        query('INSERT INTO answers (user_id, quiz_id, answers, score_earned) VALUES ($1, $2, $3, $4)', [user_id, quiz_id, answers, score_earned])
             .then(() => {
                 resolve();
             })

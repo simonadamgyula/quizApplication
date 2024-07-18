@@ -1,8 +1,19 @@
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:quiz_app/pages/finished_quiz.dart';
 
 import '../quiz.dart';
+
+const List<Color> colors = [
+  Colors.red,
+  Colors.blueAccent,
+  Color(0xFFDDC400),
+  Colors.green,
+  Colors.purple,
+  Colors.deepOrangeAccent
+];
 
 class QuestionPage extends StatefulWidget {
   const QuestionPage(
@@ -84,7 +95,13 @@ class _QuestionPageState extends State<QuestionPage> {
                 widget.answers.addAnswer(widget.question.id, answer ?? "");
                 if (widget.index + 1 == widget.quiz.questions.length) {
                   log(widget.answers.answers.toString());
-                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => FinishedQuizPage(
+                          quiz: widget.quiz, answers: widget.answers),
+                    ),
+                  );
                   return;
                 }
 
@@ -166,15 +183,6 @@ class SingleChoiceQuestion extends StatefulWidget {
   final List<String> options;
   final Function callback;
 
-  final List<Color> colors = const [
-    Colors.red,
-    Colors.blueAccent,
-    Color(0xFFDDC400),
-    Colors.green,
-    Colors.purple,
-    Colors.deepOrangeAccent
-  ];
-
   @override
   State<SingleChoiceQuestion> createState() => _SingleChoiceQuestionState();
 }
@@ -204,7 +212,7 @@ class _SingleChoiceQuestionState extends State<SingleChoiceQuestion> {
                 });
                 widget.callback(selected);
               },
-              backgroundColor: widget.colors[index],
+              backgroundColor: colors[index],
               selected: option == selected,
             );
           },
@@ -220,15 +228,6 @@ class MultipleChoiceQuestion extends StatefulWidget {
 
   final List<String> options;
   final Function callback;
-
-  final List<Color> colors = const [
-    Colors.red,
-    Colors.blueAccent,
-    Color(0xFFDDC400),
-    Colors.green,
-    Colors.purple,
-    Colors.deepOrangeAccent
-  ];
 
   @override
   State<MultipleChoiceQuestion> createState() => _MultipleChoiceQuestionState();
@@ -263,7 +262,7 @@ class _MultipleChoiceQuestionState extends State<MultipleChoiceQuestion> {
                 });
                 widget.callback(selected.join(","));
               },
-              backgroundColor: widget.colors[index],
+              backgroundColor: colors[index],
               selected: selected.contains(option),
             );
           },
@@ -290,32 +289,84 @@ class ReorderQuestion extends StatefulWidget {
 class _ReorderQuestionState extends State<ReorderQuestion> {
   List<String>? options;
 
+  Map<String, Color> colorMap = {};
+
   @override
   void initState() {
     options = widget.options;
+    for (var i = 0; i < options!.length; i++) {
+      colorMap[options![i]] = colors[i];
+    }
+
     super.initState();
+  }
+
+  Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        final double animValue = Curves.easeInOut.transform(animation.value);
+        final double elevation = lerpDouble(0, 6, animValue)!;
+        return Material(
+          elevation: elevation,
+          color: Colors.transparent,
+          shadowColor: Colors.black.withOpacity(0.7),
+          child: child,
+        );
+      },
+      child: child,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return ReorderableListView(
-      children: [
-        for (int index = 0; index < widget.options.length; index += 1)
-          ListTile(
-            key: Key("$index"),
-            tileColor: Colors.red,
-            title: Text(options![index]),
-          )
-      ],
-      onReorder: (int oldIndex, int newIndex) {
-        setState(() {
-          if (oldIndex < newIndex) {
-            newIndex -= 1;
-          }
-          final String item = options!.removeAt(oldIndex);
-          options!.insert(newIndex, item);
-        });
-      },
+    return Expanded(
+      child: ReorderableListView(
+        padding: const EdgeInsets.all(20),
+        onReorder: (int oldIndex, int newIndex) {
+          setState(() {
+            if (oldIndex < newIndex) {
+              newIndex -= 1;
+            }
+            final String item = options!.removeAt(oldIndex);
+            options!.insert(newIndex, item);
+          });
+
+          widget.callback(options!.join(","));
+        },
+        proxyDecorator: proxyDecorator,
+        children: widget.options.asMap().entries.map((entry) {
+          final index = entry.key;
+          final option = entry.value;
+
+          return Card(
+            key: ValueKey(index),
+            color: colorMap[option],
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    option,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  ReorderableDragStartListener(
+                    index: index,
+                    child: const Icon(
+                      Icons.drag_handle,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }

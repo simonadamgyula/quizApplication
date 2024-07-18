@@ -53,7 +53,6 @@ class Question {
     required this.quizId,
     required this.question,
     required this.options,
-    required this.answer,
     required this.type,
     required this.index,
   });
@@ -62,18 +61,17 @@ class Question {
   final int quizId;
   final String question;
   final List<String> options;
-  final String answer;
   final int type;
   final int index;
 
   factory Question.fromJson(Map<String, dynamic> json) {
+    log(json.toString());
     return switch (json) {
       {
         "id": String id,
         "quiz_id": String quizId,
         "question": String question,
         "type": String type,
-        "answer": String answer,
         "options": List<dynamic> options,
         "index": String index
       } =>
@@ -82,11 +80,10 @@ class Question {
           quizId: int.parse(quizId),
           question: question,
           type: int.parse(type),
-          answer: answer,
           options: List<String>.from(options),
           index: int.parse(index),
         ),
-      _ => throw const FormatException('Failed to load quiz.'),
+      _ => throw const FormatException('Failed to load question.'),
     };
   }
 }
