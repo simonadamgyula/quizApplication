@@ -21,7 +21,7 @@ export function authenticateUser(req, onFail = () => { }, onSuccess = user_id =>
             resolve(user_id);
         }, () => {
             onFail();
-            reject();
+            resolve(null);
         });
     });
 }

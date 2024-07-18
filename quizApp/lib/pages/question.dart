@@ -35,6 +35,18 @@ class _QuestionPageState extends State<QuestionPage> {
       0 => TFQuestion(
           callback: callback,
         ),
+      1 => SingleChoiceQuestion(
+          options: widget.question.options,
+          callback: callback,
+        ),
+      2 => MultipleChoiceQuestion(
+          options: widget.question.options,
+          callback: callback,
+        ),
+      3 => ReorderQuestion(
+          options: widget.question.options,
+          callback: callback,
+        ),
       _ => throw UnimplementedError(),
     };
   }
@@ -55,6 +67,8 @@ class _QuestionPageState extends State<QuestionPage> {
       ),
       body: Center(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               widget.question.question,
@@ -111,39 +125,244 @@ class _TFQuestionState extends State<TFQuestion> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Expanded(
+      child: GridView.count(
+        crossAxisCount: 2,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        children: [
+          OptionButton(
+            "True",
+            onPressed: () {
+              setState(() {
+                selected = true;
+              });
+              widget.callback(selected.toString());
+            },
+            backgroundColor: Colors.blueAccent,
+            selected: (selected != null && selected!),
+          ),
+          OptionButton(
+            "False",
+            onPressed: () {
+              setState(() {
+                selected = false;
+              });
+              widget.callback(selected.toString());
+            },
+            backgroundColor: Colors.red,
+            selected: (selected != null && !selected!),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SingleChoiceQuestion extends StatefulWidget {
+  const SingleChoiceQuestion(
+      {super.key, required this.options, required this.callback});
+
+  final List<String> options;
+  final Function callback;
+
+  final List<Color> colors = const [
+    Colors.red,
+    Colors.blueAccent,
+    Color(0xFFDDC400),
+    Colors.green,
+    Colors.purple,
+    Colors.deepOrangeAccent
+  ];
+
+  @override
+  State<SingleChoiceQuestion> createState() => _SingleChoiceQuestionState();
+}
+
+class _SingleChoiceQuestionState extends State<SingleChoiceQuestion> {
+  String? selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GridView.count(
+        primary: false,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        padding: const EdgeInsets.all(20.0),
+        crossAxisCount: 2,
+        children: widget.options.asMap().entries.map(
+          (entry) {
+            final index = entry.key;
+            final option = entry.value;
+
+            return OptionButton(
+              option,
+              onPressed: () {
+                setState(() {
+                  selected = option;
+                });
+                widget.callback(selected);
+              },
+              backgroundColor: widget.colors[index],
+              selected: option == selected,
+            );
+          },
+        ).toList(),
+      ),
+    );
+  }
+}
+
+class MultipleChoiceQuestion extends StatefulWidget {
+  const MultipleChoiceQuestion(
+      {super.key, required this.options, required this.callback});
+
+  final List<String> options;
+  final Function callback;
+
+  final List<Color> colors = const [
+    Colors.red,
+    Colors.blueAccent,
+    Color(0xFFDDC400),
+    Colors.green,
+    Colors.purple,
+    Colors.deepOrangeAccent
+  ];
+
+  @override
+  State<MultipleChoiceQuestion> createState() => _MultipleChoiceQuestionState();
+}
+
+class _MultipleChoiceQuestionState extends State<MultipleChoiceQuestion> {
+  List<String> selected = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GridView.count(
+        primary: false,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        padding: const EdgeInsets.all(20.0),
+        crossAxisCount: 2,
+        children: widget.options.asMap().entries.map(
+          (entry) {
+            final index = entry.key;
+            final option = entry.value;
+
+            return OptionButton(
+              option,
+              onPressed: () {
+                setState(() {
+                  if (selected.contains(option)) {
+                    selected.remove(option);
+                  } else {
+                    selected.add(option);
+                  }
+                });
+                widget.callback(selected.join(","));
+              },
+              backgroundColor: widget.colors[index],
+              selected: selected.contains(option),
+            );
+          },
+        ).toList(),
+      ),
+    );
+  }
+}
+
+class ReorderQuestion extends StatefulWidget {
+  const ReorderQuestion({
+    super.key,
+    required this.options,
+    required this.callback,
+  });
+
+  final List<String> options;
+  final Function callback;
+
+  @override
+  State<ReorderQuestion> createState() => _ReorderQuestionState();
+}
+
+class _ReorderQuestionState extends State<ReorderQuestion> {
+  List<String>? options;
+
+  @override
+  void initState() {
+    options = widget.options;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ReorderableListView(
+      children: [
+        for (int index = 0; index < widget.options.length; index += 1)
+          ListTile(
+            key: Key("$index"),
+            tileColor: Colors.red,
+            title: Text(options![index]),
+          )
+      ],
+      onReorder: (int oldIndex, int newIndex) {
+        setState(() {
+          if (oldIndex < newIndex) {
+            newIndex -= 1;
+          }
+          final String item = options!.removeAt(oldIndex);
+          options!.insert(newIndex, item);
+        });
+      },
+    );
+  }
+}
+
+class OptionButton extends StatelessWidget {
+  const OptionButton(
+    this.text, {
+    super.key,
+    required this.onPressed,
+    required this.backgroundColor,
+    required this.selected,
+  });
+
+  final String text;
+  final void Function() onPressed;
+  final Color backgroundColor;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
       children: [
         TextButton(
-          onPressed: () {
-            setState(() {
-              selected = true;
-            });
-            widget.callback(selected.toString());
-          },
+          onPressed: onPressed,
           style: TextButton.styleFrom(
-              backgroundColor:
-                  (selected != null && selected!) ? Colors.green : Colors.red),
-          child: const Text(
-            "True",
-            style: TextStyle(color: Colors.white),
+            backgroundColor: backgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+          ),
+          child: Text(
+            text,
+            style: const TextStyle(color: Colors.white),
           ),
         ),
-        TextButton(
-          onPressed: () {
-            setState(() {
-              selected = false;
-            });
-            widget.callback(selected.toString());
-          },
-          style: TextButton.styleFrom(
-              backgroundColor:
-                  (selected != null && !selected!) ? Colors.green : Colors.red),
-          child: const Text(
-            "False",
-            style: TextStyle(color: Colors.white),
-          ),
-        )
+        Positioned(
+          top: 10,
+          left: 10,
+          child: selected
+              ? const Icon(
+                  Icons.check_circle_outline,
+                  size: 25,
+                  color: Colors.white,
+                )
+              : const SizedBox(),
+        ),
       ],
     );
   }
