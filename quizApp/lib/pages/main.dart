@@ -1,12 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:provider/provider.dart';
+import 'package:quiz_app/api.dart';
 import 'package:quiz_app/pages/login.dart';
 import 'package:quiz_app/pages/quiz.dart';
 
 import '../authentication.dart';
+import '../quiz.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -21,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   final _key = GlobalKey<ExpandableFabState>();
 
   final FocusNode numberNode = FocusNode();
+  bool loading = false;
 
   List<TextEditingController?> controllers = [];
   List<FocusNode?> focuses = [];
@@ -41,10 +46,26 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+  Future<Quiz> _futureGetQuiz(String code) async {
+    final response = await sendApiRequest(
+      "/quiz/get",
+      {"code": code},
+      authToken: Session().getToken(),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(response.statusCode.toString());
+    }
+
+    final body = jsonDecode(response.body);
+    return Quiz.fromJson(body);
+  }
+
   void clearCode() {
     for (var controller in controllers) {
       controller?.clear();
-    }}
+    }
+  }
 
   Future<void> _openQuizCodeDialog(BuildContext context) {
     bool pastDash = false;
@@ -95,16 +116,43 @@ class _HomePageState extends State<HomePage> {
                     }).toList();
                     String code = codeList.join();
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => QuizPage(code: code)),
-                    );
+                    setState(() {
+                      loading = true;
+                    });
+
+                    _futureGetQuiz(code).then((quiz) {
+                      if (!loading) return;
+
+                      setState(() {
+                        loading = false;
+                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => QuizPage(
+                                  quiz: quiz,
+                                )),
+                      );
+                    }).catchError((error) {
+                      if (!loading || !context.mounted) return;
+
+                      setState(() {
+                        loading = false;
+                      });
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(error.toString())));
+                    });
                   },
-                  child: const Text("Enter"),
+                  child: loading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("Enter"),
                 ),
                 TextButton(
                   onPressed: () {
+                    setState(() {
+                      loading = false;
+                    });
                     clearCode();
                     Navigator.pop(context);
                   },
