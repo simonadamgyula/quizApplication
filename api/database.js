@@ -80,6 +80,19 @@ export function createQuiz(quiz, user_id, code) {
     });
 }
 
+export function getQuizzes(user_id) {
+    return new Promise((resolve, reject) => {
+        query('SELECT * FROM quizzes WHERE user_id = $1', [user_id])
+            .then(result => {
+                resolve(result.rows);
+            })
+            .catch(err => {
+                reject(err);
+            });
+    });
+
+}
+
 export async function getQuizById(id, user_id) {
     if (!await checkAuthorization(user_id, id)) {
         reject("Unauthorized");

@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/api.dart';
+import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
 
 import '../authentication.dart';
 import '../quiz.dart';
@@ -131,10 +131,39 @@ class Questions extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.all(4),
           child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: quiz.questions
-                  .map((question) => QuestionPreview(question: question))
-                  .toList()),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: (quiz.questions
+                    .map((question) =>
+                        QuestionPreview(question: question) as Widget)
+                    .toList()) +
+                <Widget>[
+                  InkWell(
+                    onTap: () {
+                      // TODO: Add create question functionality
+                    },
+                    child: Container(
+                      height: 60,
+                      margin: const EdgeInsets.all(2),
+                      padding: const EdgeInsets.all(15),
+                      decoration: const BoxDecoration(
+                        border: DashedBorder.fromBorderSide(
+                            side: BorderSide(
+                              color: Colors.white,
+                              width: 2,
+                            ),
+                            dashLength: 10),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+          ),
         );
       },
     );
@@ -148,25 +177,31 @@ class QuestionPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      margin: const EdgeInsets.all(2),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.white,
-          width: 2,
+    return InkWell(
+      child: Container(
+        height: 60,
+        margin: const EdgeInsets.all(2),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Colors.white,
+            width: 2,
+          ),
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            question.question,
-            style: const TextStyle(color: Colors.white),
-          )
-        ],
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              question.question,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

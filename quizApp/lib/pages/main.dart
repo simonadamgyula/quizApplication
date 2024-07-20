@@ -9,6 +9,7 @@ import 'package:quiz_app/api.dart';
 import 'package:quiz_app/pages/login.dart';
 import 'package:quiz_app/pages/quiz.dart';
 import 'package:quiz_app/pages/quiz_add.dart';
+import 'package:quiz_app/pages/quiz_edit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../authentication.dart';
@@ -206,7 +207,7 @@ class _HomePageState extends State<HomePage> {
                           return LoginButton(session: session);
                         }
 
-                        return Text(session.getToken()!);
+                        return QuizList(session: session);
                       },
                     ),
                   ],
@@ -288,6 +289,76 @@ class _HomePageState extends State<HomePage> {
             ],
           )
         ],
+      ),
+    );
+  }
+}
+
+class QuizList extends StatelessWidget {
+  const QuizList({super.key, required this.session});
+
+  final Session session;
+
+  Future<List<Quiz>> getOwnedQuizzes() async {
+    final response = await sendApiRequest(
+      "/quiz/get_all",
+      {},
+      authToken: session.getToken(),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception("Unable to load your quizzes.");
+    }
+
+    final body = jsonDecode(response.body) as List;
+    return body.map((quiz) => Quiz.fromJson(quiz)).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final futureQuizzes = getOwnedQuizzes();
+
+    return FutureBuilder<List<Quiz>>(
+      future: futureQuizzes,
+      builder: (context, AsyncSnapshot<List<Quiz>> snapshot) {
+        if (snapshot.hasError) {
+          return Text(snapshot.error.toString());
+        }
+        if (!snapshot.hasData) {
+          return const CircularProgressIndicator(color: Colors.white);
+        }
+
+        final List<Quiz> quizzes = snapshot.data!;
+
+        return Column(
+          children: quizzes.map((quiz) => QuizPreview(quiz: quiz)).toList(),
+        );
+      },
+    );
+  }
+}
+
+class QuizPreview extends StatelessWidget {
+  const QuizPreview({super.key, required this.quiz});
+
+  final Quiz quiz;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => QuizEditPage(id: quiz.id)));
+      },
+      child: Container(
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(5),
+        child: Text(
+          quiz.name,
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

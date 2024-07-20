@@ -77,6 +77,19 @@ class Question {
   final int index;
   final String? answer;
 
+  String get typeString {
+    return switch (type) {
+      0 => "True or False",
+      1 => "Single choice",
+      2 => "Multiple choice",
+      3 => "Order",
+      4 => "Number line",
+      5 => "Multiple choice number line",
+      6 => "Range",
+      _ => "",
+    };
+  }
+
   factory Question.fromJson(Map<String, dynamic> json) {
     log(json.toString());
     return switch (json) {
