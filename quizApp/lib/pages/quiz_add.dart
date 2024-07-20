@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:quiz_app/api.dart';
+import 'package:quiz_app/pages/quiz_edit.dart';
 
 import '../authentication.dart';
 
@@ -63,10 +65,19 @@ class QuizCreateForm extends StatelessWidget {
                   return;
                 }
 
+                log(response.body);
                 final body = jsonDecode(response.body);
                 final id = int.parse(body["id"]);
 
-                // TODO: Navigate to quiz edit page
+                log(context.mounted.toString());
+                if (!context.mounted) return;
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => QuizEditPage(id: id),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 side: const BorderSide(

@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import pg from 'pg';
 const { Client } = pg;
+import { ADMIN_USER } from './utils.js';
 
 const dbConfig = {
     user: process.env.DB_USER,
@@ -45,6 +46,10 @@ function query(text, params) {
  * @returns {Promise<boolean>}
  */
 function checkAuthorization(user_id, quiz_id) {
+    if (user_id === ADMIN_USER) {
+        return true;
+    }
+
     return new Promise((resolve, reject) => {
         query('SELECT user_id FROM quizzes WHERE id = $1', [quiz_id])
             .then(result => {
@@ -75,6 +80,23 @@ export function createQuiz(quiz, user_id, code) {
     });
 }
 
+export async function getQuizById(id, user_id) {
+    if (!await checkAuthorization(user_id, id)) {
+        reject("Unauthorized");
+        return;
+    }
+
+    return new Promise((resolve, reject) => {
+        query('SELECT * FROM quizzes WHERE id = $1', [id])
+            .then(result => {
+                resolve(result.rows[0]);
+            })
+            .catch(err => {
+                reject(err);
+            });
+    })
+}
+
 /**
  * 
  * @param {string} code 
@@ -98,7 +120,12 @@ export function getQuizByCode(code) {
  * @param {number} quiz_id 
  * @returns {Promise<Object[]>}
  */
-export function getQuestions(quiz_id, validate = false) {
+export async function getQuestions(quiz_id, user_id) {
+    var return_answer = false;
+    if (await checkAuthorization(user_id, quiz_id)) {
+        return_answer = true;
+    }
+
     return new Promise((resolve, reject) => {
         query('SELECT * FROM questions WHERE quiz_id = $1', [quiz_id])
             .then(result => {
@@ -110,7 +137,7 @@ export function getQuestions(quiz_id, validate = false) {
                         type: row.type,
                         options: row.options,
                         index: row.index,
-                        answer: validate ? row.answer : null,
+                        answer: return_answer ? row.answer : null,
                     }
                 }
                 )

@@ -250,6 +250,8 @@ class _HomePageState extends State<HomePage> {
               FloatingActionButton.small(
                 heroTag: null,
                 onPressed: () {
+                  if (Session().getToken() == null) return;
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(

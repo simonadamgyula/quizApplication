@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:quiz_app/api.dart';
+import 'package:quiz_app/authentication.dart';
 
 class Quiz {
   Quiz({
@@ -23,6 +24,7 @@ class Quiz {
       {
         "id": id,
       },
+      authToken: Session().getToken(),
     );
 
     if (response.statusCode != 200) {
@@ -64,6 +66,7 @@ class Question {
     required this.options,
     required this.type,
     required this.index,
+    this.answer,
   });
 
   final int id;
@@ -72,10 +75,28 @@ class Question {
   final List<String> options;
   final int type;
   final int index;
+  final String? answer;
 
   factory Question.fromJson(Map<String, dynamic> json) {
     log(json.toString());
     return switch (json) {
+      {
+        "id": String id,
+        "quiz_id": String quizId,
+        "question": String question,
+        "type": String type,
+        "options": List<dynamic> options,
+        "index": String index,
+        "answer": String answer,
+      } =>
+        Question(
+            id: int.parse(id),
+            quizId: int.parse(quizId),
+            question: question,
+            type: int.parse(type),
+            options: List<String>.from(options),
+            index: int.parse(index),
+            answer: answer),
       {
         "id": String id,
         "quiz_id": String quizId,

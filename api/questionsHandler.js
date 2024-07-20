@@ -39,10 +39,12 @@ async function createQuestionHandler(req, res, body) {
             });
 }
 
-function getQuestionsHandler(req, res, body) {
+async function getQuestionsHandler(req, res, body) {
+    const user_id = await authenticateUser(req);
+
     const { id } = body;
 
-    getQuestions(id)
+    getQuestions(id, user_id)
         .then(questions => {
             Response.OK(res).send(questions);
         });

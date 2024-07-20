@@ -1,6 +1,6 @@
 import { Response } from "./response.js";
 import { getBody } from "./index.js";
-import { createQuiz, getQuizByCode } from "./database.js";
+import { createQuiz, getQuizByCode, getQuizById } from "./database.js";
 import { questionsHandler } from "./questionsHandler.js";
 import { authenticateUser } from "./authentication.js";
 import { answerHandler } from "./answerHandler.js";
@@ -21,6 +21,9 @@ export function handleQuiz(req, res, url) {
                 case "get":
                     getQuiz(req, res, body);
                     break;
+                case "get_owned":
+                    getOwnedQuiz(req, res, body);
+                    break;
                 case "questions":
                     questionsHandler(req, res, url, body);
                     break;
@@ -35,6 +38,20 @@ export function handleQuiz(req, res, url) {
     } else if (req.method === "GET") {
         Response.NotFound(res).send("Not found");
     }
+}
+
+async function getOwnedQuiz(req, res, body) {
+    const user_id = await authenticateUser(req, () => {
+        Response.Unauthorized(res).send("Unauthorized");
+    });
+    if (!user_id) return;
+
+    const { id } = body;
+
+    getQuizById(id, user_id)
+        .then(quiz => {
+            Response.OK(res).send(quiz);
+        });
 }
 
 async function getQuiz(req, res, body) {

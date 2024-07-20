@@ -1,5 +1,6 @@
 import { Response } from "./response.js";
 import { authenticateUser } from "./authentication.js";
+import { ADMIN_USER } from "./utils.js";
 import { getAnswerById, getAnswersByQuestionId, submitAnswer, getQuestions } from "./database.js";
 
 export function answerHandler(req, res, url, body) {
@@ -91,7 +92,7 @@ async function submitAnswerHandler(req, res, body) {
 }
 
 async function validateAnswers(quiz_id, answers) {
-    const questions = await getQuestions(quiz_id, true);
+    const questions = await getQuestions(quiz_id, ADMIN_USER);
     var scores = [];
 
     if (questions.length !== Object.keys(answers).length) {
