@@ -28,15 +28,15 @@ async function createQuestionHandler(req, res, body) {
     });
     if (!user_id) return;
 
-    const { quiz_id, question, answer, options, type } = body;
+    const { quiz_id, question, answer, options, type, index } = body;
 
-    createQuestion(user_id, quiz_id, question, type, options, answer)
-        .then(() => {
-            Response.OK(res).send("Question created");
-        },
-            reason => {
-                Response.BadRequest(res).send("Question creation failed: " + reason);
-            });
+    createQuestion(user_id, quiz_id, question, type, options, answer, index)
+        .then(id => {
+            Response.OK(res).send({ id });
+        })
+        .catch(reason => {
+            Response.BadRequest(res).send("Question creation failed: " + reason);
+        });
 }
 
 async function getQuestionsHandler(req, res, body) {

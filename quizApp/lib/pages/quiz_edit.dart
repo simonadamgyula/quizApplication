@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/api.dart';
 import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
+import 'package:quiz_app/pages/question_edit.dart';
 
 import '../authentication.dart';
 import '../quiz.dart';
@@ -88,6 +89,9 @@ class _QuizEditPageState extends State<QuizEditPage> {
                 controller: nameController,
                 style: const TextStyle(color: Colors.white),
               ),
+              const SizedBox(
+                height: 40,
+              ),
               Questions(quiz: quiz)
             ],
           );
@@ -115,9 +119,9 @@ class Questions extends StatelessWidget {
       future: futureQuestions,
       builder: (context, AsyncSnapshot<bool> snapshot) {
         if (snapshot.hasError) {
-          return const Text(
-            "Unable to load questions",
-            style: TextStyle(
+          return Text(
+            "Unable to load questions: ${snapshot.error.toString()}",
+            style: const TextStyle(
               color: Colors.white,
             ),
           );
@@ -128,66 +132,159 @@ class Questions extends StatelessWidget {
           );
         }
 
-        return Padding(
-          padding: const EdgeInsets.all(4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: (quiz.questions
-                    .map((question) =>
-                        QuestionPreview(question: question) as Widget)
-                    .toList()) +
-                <Widget>[
-                  InkWell(
-                    onTap: () {
-                      // TODO: Add create question functionality
-                    },
-                    child: Container(
-                      height: 60,
-                      margin: const EdgeInsets.all(2),
-                      padding: const EdgeInsets.all(15),
-                      decoration: const BoxDecoration(
-                        border: DashedBorder.fromBorderSide(
-                            side: BorderSide(
-                              color: Colors.white,
-                              width: 2,
-                            ),
-                            dashLength: 10),
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.add,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  )
-                ],
-          ),
+        return Column(
+          children: [
+            const Text(
+              "Questions",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 30),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: (quiz.questions
+                        .map((question) => QuestionPreview(
+                              question: question,
+                              quiz: quiz,
+                            ) as Widget)
+                        .toList()) +
+                    <Widget>[AddQuestionButton(quiz: quiz)],
+              ),
+            ),
+          ],
         );
       },
     );
   }
 }
 
-class QuestionPreview extends StatelessWidget {
-  const QuestionPreview({super.key, required this.question});
+class AddQuestionButton extends StatefulWidget {
+  const AddQuestionButton({super.key, required this.quiz});
 
+  final Quiz quiz;
+
+  @override
+  State<AddQuestionButton> createState() => _AddQuestionButtonState();
+}
+
+class _AddQuestionButtonState extends State<AddQuestionButton> {
+  bool loading = false;
+
+  Future<Question?> _createNewQuestion() async {
+    final response = await sendApiRequest(
+      "/quiz/questions/create",
+      {
+        "quiz_id": widget.quiz.id,
+        "question": "",
+        "answer": "",
+        "options": [],
+        "type": 0,
+        "index": widget.quiz.questions.length,
+      },
+      authToken: Session().getToken(),
+    );
+
+    if (response.statusCode != 200) {
+      return null;
+    }
+
+    final body = jsonDecode(response.body);
+    return Question.fromJson({
+      "id": body["id"],
+      "quiz_id": widget.quiz.id.toString(),
+      "question": "",
+      "answer": "",
+      "options": [],
+      "type": "0",
+      "index": widget.quiz.questions.length.toString(),
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        setState(() {
+          loading = true;
+        });
+
+        final Question? question = await _createNewQuestion();
+
+        if (question != null && context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  QuestionEditPage(quiz: widget.quiz, question: question),
+            ),
+          );
+        }
+
+        setState(() {
+          loading = false;
+        });
+      },
+      child: Container(
+        height: 60,
+        margin: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(15),
+        decoration: const BoxDecoration(
+          border: DashedBorder.fromBorderSide(
+              side: BorderSide(
+                color: Color(0xff181b23),
+                width: 4,
+              ),
+              dashLength: 10),
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+        child: Center(
+          child: loading
+              ? const CircularProgressIndicator(
+                  color: Colors.white,
+                )
+              : const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
+        ),
+      ),
+    );
+  }
+}
+
+class QuestionPreview extends StatelessWidget {
+  const QuestionPreview(
+      {super.key, required this.question, required this.quiz});
+
+  final Quiz quiz;
   final Question question;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                QuestionEditPage(quiz: quiz, question: question),
+          ),
+        );
+      },
       child: Container(
         height: 60,
         margin: const EdgeInsets.all(2),
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Colors.white,
+            color: const Color(0xff181b23),
             width: 2,
           ),
           borderRadius: const BorderRadius.all(Radius.circular(10)),
+          color: const Color(0xff181b23),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,

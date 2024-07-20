@@ -172,16 +172,18 @@ export async function getQuestions(quiz_id, user_id) {
  * @param {string | any} answer 
  * @returns {Promise<void>}
  */
-export function createQuestion(user_id, quiz_id, question, type, options, answer) {
+export function createQuestion(user_id, quiz_id, question, type, options, answer, index) {
+    console.log(options);
+
     return new Promise(async (resolve, reject) => {
         if (!await checkAuthorization(user_id, quiz_id)) {
             reject("Unauthorized");
             return;
         }
 
-        query('INSERT INTO questions (quiz_id, question, type, options, answer) VALUES ($1, $2, $3, $4, $5)', [quiz_id, question, type, options, answer])
-            .then(() => {
-                resolve();
+        query('INSERT INTO questions (quiz_id, question, type, options, answer, index) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id', [quiz_id, question, type, options, answer, index])
+            .then(result => {
+                resolve(result.rows[0].id);
             })
             .catch(err => {
                 reject(err);

@@ -73,7 +73,7 @@ class Question {
   final int quizId;
   final String question;
   final List<String> options;
-  final int type;
+  int type;
   final int index;
   final String? answer;
 
@@ -91,7 +91,14 @@ class Question {
   }
 
   factory Question.fromJson(Map<String, dynamic> json) {
-    log(json.toString());
+    log("Json: ${json.toString()}");
+    log(json["id"].runtimeType.toString());
+    log(json["quiz_id"].runtimeType.toString());
+    log(json["question"].runtimeType.toString());
+    log(json["type"].runtimeType.toString());
+    log(json["options"].runtimeType.toString());
+    log(json["index"].runtimeType.toString());
+    log(json["answer"].runtimeType.toString());
     return switch (json) {
       {
         "id": String id,
