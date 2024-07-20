@@ -1,7 +1,7 @@
 import { Response } from "./response.js";
 import { getBody } from "./index.js";
 import { createQuiz, getQuizByCode } from "./database.js";
-import { questionsHander } from "./questionsHandler.js";
+import { questionsHandler } from "./questionsHandler.js";
 import { authenticateUser } from "./authentication.js";
 import { answerHandler } from "./answerHandler.js";
 
@@ -22,7 +22,7 @@ export function handleQuiz(req, res, url) {
                     getQuiz(req, res, body);
                     break;
                 case "questions":
-                    questionsHander(req, res, url, body);
+                    questionsHandler(req, res, url, body);
                     break;
                 case "answers":
                     answerHandler(req, res, url, body);
@@ -61,8 +61,8 @@ async function newQuiz(req, res, body) {
     const code = Math.random().toString().substring(2, 10);
 
     createQuiz(name, user_id, code)
-        .then(() => {
-            Response.OK(res).send("Quiz created");
+        .then(id => {
+            Response.OK(res).send({ id });
         });
 }
 

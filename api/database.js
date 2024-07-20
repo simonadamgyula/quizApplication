@@ -65,9 +65,9 @@ function checkAuthorization(user_id, quiz_id) {
  */
 export function createQuiz(quiz, user_id, code) {
     return new Promise((resolve, reject) => {
-        query('INSERT INTO quizzes (name, user_id, code) VALUES ($1, $2, $3) RETURNING code', [quiz, user_id, code])
-            .then(() => {
-                resolve();
+        query('INSERT INTO quizzes (name, user_id, code) VALUES ($1, $2, $3) RETURNING id', [quiz, user_id, code])
+            .then(result => {
+                resolve(result.rows[0].id);
             })
             .catch(err => {
                 reject(err);
@@ -98,7 +98,7 @@ export function getQuizByCode(code) {
  * @param {number} quiz_id 
  * @returns {Promise<Object[]>}
  */
-export function getQuestions(quiz_id) {
+export function getQuestions(quiz_id, validate = false) {
     return new Promise((resolve, reject) => {
         query('SELECT * FROM questions WHERE quiz_id = $1', [quiz_id])
             .then(result => {
@@ -109,7 +109,8 @@ export function getQuestions(quiz_id) {
                         question: row.question,
                         type: row.type,
                         options: row.options,
-                        index: row.index
+                        index: row.index,
+                        answer: validate ? row.answer : null,
                     }
                 }
                 )
@@ -386,7 +387,7 @@ export function submitAnswer(user_id, quiz_id, answers, score_earned) {
             return;
         }
 
-        query('INSERT INTO answers (user_id, quiz_id, answers, score_earned) VALUES ($1, $2, $3, $4)', [user_id, quiz_id, answers, score_earned])
+        query('INSERT INTO answers (account_id, quiz_id, answers, scores_earned) VALUES ($1, $2, $3, $4)', [user_id, quiz_id, answers, score_earned])
             .then(() => {
                 resolve();
             })

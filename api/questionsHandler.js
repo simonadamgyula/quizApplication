@@ -2,7 +2,7 @@ import { Response } from "./response.js";
 import { getQuestions, createQuestion, editQuestion, deleteQuestion } from "./database.js";
 import { authenticateUser } from "./authentication.js";
 
-export function questionsHander(req, res, url, body) {
+export function questionsHandler(req, res, url, body) {
     switch (url[2]) {
         case "get":
             getQuestionsHandler(req, res, body);
@@ -20,7 +20,6 @@ export function questionsHander(req, res, url, body) {
             Response.NotFound(res).send("Not found");
             break;
     }
-
 }
 
 async function createQuestionHandler(req, res, body) {

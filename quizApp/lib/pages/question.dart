@@ -332,6 +332,7 @@ class _ReorderQuestionState extends State<ReorderQuestion> {
             options!.insert(newIndex, item);
           });
 
+          log(options.toString());
           widget.callback(options!.join(","));
         },
         proxyDecorator: proxyDecorator,

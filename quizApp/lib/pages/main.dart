@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:quiz_app/api.dart';
 import 'package:quiz_app/pages/login.dart';
 import 'package:quiz_app/pages/quiz.dart';
+import 'package:quiz_app/pages/quiz_add.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../authentication.dart';
 import '../quiz.dart';
@@ -26,9 +28,22 @@ class _HomePageState extends State<HomePage> {
 
   final FocusNode numberNode = FocusNode();
   bool loading = false;
+  bool finishedInit = false;
 
   List<TextEditingController?> controllers = [];
   List<FocusNode?> focuses = [];
+
+  Future<void> loadSessionId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionToken = prefs.getString("token");
+
+    if (sessionToken != null) {
+      Session().setToken(sessionToken);
+    }
+    setState(() {
+      finishedInit = true;
+    });
+  }
 
   @override
   void initState() {
@@ -43,6 +58,7 @@ class _HomePageState extends State<HomePage> {
         controllers.add(null);
       }
     }
+    loadSessionId();
     super.initState();
   }
 
@@ -140,8 +156,8 @@ class _HomePageState extends State<HomePage> {
                         loading = false;
                       });
                       Navigator.pop(context);
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(SnackBar(content: Text(error.toString())));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(error.toString())));
                     });
                   },
                   child: loading
@@ -177,25 +193,29 @@ class _HomePageState extends State<HomePage> {
           style: const TextStyle(color: Colors.white),
         ),
       ),
-      body: ChangeNotifierProvider<Session>(
-        create: (context) => Session(),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Consumer<Session>(
-                builder: (context, session, child) {
-                  if (session.getToken() == null) {
-                    return LoginButton(session: session);
-                  }
+      body: finishedInit
+          ? ChangeNotifierProvider<Session>(
+              create: (context) => Session(),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Consumer<Session>(
+                      builder: (context, session, child) {
+                        if (session.getToken() == null) {
+                          return LoginButton(session: session);
+                        }
 
-                  return Text(session.getToken()!);
-                },
+                        return Text(session.getToken()!);
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
+            )
+          : const CircularProgressIndicator(
+              color: Colors.white,
+            ),
       floatingActionButtonLocation: ExpandableFab.location,
       floatingActionButton: ExpandableFab(
         key: _key,
@@ -220,19 +240,26 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: Colors.white,
         ),
         children: [
-          const Row(
+          Row(
             children: [
-              Text(
+              const Text(
                 "Create",
                 style: TextStyle(color: Colors.white),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               FloatingActionButton.small(
                 heroTag: null,
-                onPressed: null,
-                backgroundColor: Color(0xff6dd35e),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const QuizAddPage(),
+                    ),
+                  );
+                },
+                backgroundColor: const Color(0xff6dd35e),
                 foregroundColor: Colors.white,
-                child: Icon(Icons.add_circle_outline),
+                child: const Icon(Icons.add_circle_outline),
               ),
             ],
           ),

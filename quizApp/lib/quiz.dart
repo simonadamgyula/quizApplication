@@ -4,11 +4,17 @@ import 'dart:developer';
 import 'package:quiz_app/api.dart';
 
 class Quiz {
-  Quiz({required this.name, required this.owner, required this.id});
+  Quiz({
+    required this.name,
+    required this.owner,
+    required this.id,
+    required this.maxPoints,
+  });
 
   final int id;
   final String name;
   final String owner;
+  final int maxPoints;
   List<Question> questions = [];
 
   Future<void> loadQuestions() async {
@@ -31,16 +37,19 @@ class Quiz {
   }
 
   factory Quiz.fromJson(Map<String, dynamic> json) {
+    log(json.toString());
     return switch (json) {
       {
         "id": String id,
         "name": String name,
         "user_id": String owner,
+        "max_points": String maxPoints,
       } =>
         Quiz(
           name: name,
           owner: owner,
           id: int.parse(id),
+          maxPoints: int.parse(maxPoints),
         ),
       _ => throw const FormatException('Failed to load quiz.'),
     };
@@ -93,9 +102,9 @@ class Answer {
 
   final String user;
   final int length;
-  Map<int, String> answers = {};
+  Map<String, String> answers = {};
 
   void addAnswer(int id, String answer) {
-    answers[id] = answer;
+    answers[id.toString()] = answer;
   }
 }

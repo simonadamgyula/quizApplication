@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:quiz_app/api.dart';
 
@@ -52,20 +54,32 @@ class QuizCreateForm extends StatelessWidget {
                 if (!_formKey.currentState!.validate()) {
                   return;
                 }
-                
-                final response = await sendApiRequest("/quiz/new", {"name": nameController.text}, authToken: Session().getToken());
+
+                final response = await sendApiRequest(
+                    "/quiz/new", {"name": nameController.text},
+                    authToken: Session().getToken());
 
                 if (response.statusCode != 200) {
                   return;
                 }
 
-                if (!context.mounted) return;
+                final body = jsonDecode(response.body);
+                final id = int.parse(body["id"]);
 
-                Navigator.pop(context, true);
+                // TODO: Navigate to quiz edit page
               },
+              style: ElevatedButton.styleFrom(
+                side: const BorderSide(
+                  width: 2,
+                  color: Colors.white,
+                ),
+                backgroundColor: Colors.transparent,
+              ),
               child: const Text(
                 "Create",
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(
+                  color: Colors.white,
+                ),
               ))
         ],
       ),

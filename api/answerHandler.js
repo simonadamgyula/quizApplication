@@ -1,6 +1,6 @@
 import { Response } from "./response.js";
 import { authenticateUser } from "./authentication.js";
-import { getAnswerById, getAnswersByQuestionId, submitAnswer } from "./database.js";
+import { getAnswerById, getAnswersByQuestionId, submitAnswer, getQuestions } from "./database.js";
 
 export function answerHandler(req, res, url, body) {
     switch (url[2]) {
@@ -74,10 +74,63 @@ async function submitAnswerHandler(req, res, body) {
     });
     if (!user_id) return;
 
-    const { question_id, answer, score_earned } = body;
+    const { quiz_id, answers } = body;
 
-    submitAnswer(user_id, question_id, answer, score_earned)
+    var score_earned = 0;
+    try {
+        score_earned = await validateAnswers(quiz_id, answers);
+    } catch (e) {
+        Response.BadRequest(res).send(e.message);
+        return;
+    }
+
+    submitAnswer(user_id, quiz_id, answers, score_earned)
         .then(() => {
-            Response.OK(res).send("Answer submitted");
+            Response.OK(res).send({ score: score_earned });
         });
+}
+
+async function validateAnswers(quiz_id, answers) {
+    const questions = await getQuestions(quiz_id, true);
+    var scores = [];
+
+    if (questions.length !== Object.keys(answers).length) {
+        throw Error("Invalid number of answers");
+    }
+
+    for (let i = 0; i < questions.length; i++) {
+        const question = questions[i];
+        switch (parseInt(question.type)) {
+            case 0:
+            case 1:
+            case 3:
+            case 4:
+            case 6:
+                if (answers[question.id.toString()] !== question.answer) {
+                    scores.push(0);
+                } else {
+                    scores.push(1);
+                }
+                break;
+            case 2:
+            case 5:
+                const selected = answers[question.id.toString()].split(",");
+                const correct = question.answer.split(",");
+
+                var score = 0;
+
+                for (let single_selected in selected) {
+                    if (!correct.includes(single_selected)) {
+                        score--;
+                        continue;
+                    }
+                    score++;
+                }
+
+                scores.push(Math.max(0, score));
+                break;
+        }
+    }
+
+    return scores.reduce((a, b) => a + b, 0);
 }

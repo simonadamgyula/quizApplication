@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/api.dart';
 
@@ -14,7 +15,7 @@ class FinishedQuizPage extends StatelessWidget {
   final Quiz quiz;
   final Answer answers;
 
-  Future<double> submitAnswers() async {
+  Future<double> _submitAnswers() async {
     log("submitting answers");
     final response = await sendApiRequest("/quiz/answers/create",
         {"quiz_id": quiz.id, "answers": answers.answers},
@@ -25,12 +26,12 @@ class FinishedQuizPage extends StatelessWidget {
     }
 
     final body = jsonDecode(response.body);
-    return body["score"];
+    return body["score"].toDouble();
   }
 
   @override
   Widget build(BuildContext context) {
-    final futureScore = submitAnswers();
+    final futureScore = _submitAnswers();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -45,16 +46,54 @@ class FinishedQuizPage extends StatelessWidget {
       body: Column(
         children: [
           Text(answers.answers.toString()),
-          FutureBuilder(
+          FutureBuilder<double>(
             future: futureScore,
             builder: (context, AsyncSnapshot<double> snapshot) {
-              if (!snapshot.hasData) {
-                return const CircularProgressIndicator(color: Colors.white);
-              } else if (snapshot.hasError) {
+              if (snapshot.hasError) {
                 return Text(snapshot.error.toString());
               }
+              if (!snapshot.hasData) {
+                return const CircularProgressIndicator(color: Colors.white);
+              }
 
-              return Text(snapshot.data.toString());
+              final double scoreEarned = snapshot.data!;
+
+              return Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "You have earned: ",
+                      style: TextStyle(
+                        color: CupertinoColors.systemGrey2,
+                        fontSize: 30,
+                      ),
+                    ),
+                    Text(
+                      "$scoreEarned / ${quiz.maxPoints}",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "${(scoreEarned / quiz.maxPoints) * 100}%",
+                      style: const TextStyle(
+                        color: CupertinoColors.systemGrey,
+                        fontSize: 35,
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Continue"),
+                    ),
+                  ],
+                ),
+              );
             },
           ),
         ],
