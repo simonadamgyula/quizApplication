@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
@@ -75,6 +76,10 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
           question: widget.question,
           updater: editQuestion,
         ),
+      3 => ReorderOptions(
+          question: widget.question,
+          updater: editQuestion,
+        ),
       _ => const SizedBox(),
     };
   }
@@ -118,7 +123,11 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
               TypeSelectButton("Multiple choice",
                   callback: typeSelectCallback,
                   icon: Icons.indeterminate_check_box_sharp,
-                  value: 2)
+                  value: 2),
+              TypeSelectButton("Reorder",
+                  callback: typeSelectCallback,
+                  icon: Icons.indeterminate_check_box_sharp,
+                  value: 3),
             ],
           ),
         );
@@ -161,17 +170,32 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
               });
             },
           ),
-          MaterialButton(
-            onPressed: () {
-              showTypeSelect();
-            },
-            child: Row(
-              children: [
-                Text(
-                  widget.question.typeString,
-                  style: const TextStyle(color: Colors.white),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: MaterialButton(
+              onPressed: () {
+                showTypeSelect();
+              },
+              padding: const EdgeInsets.all(10),
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(
+                  color: Colors.white,
+                  width: 1,
                 ),
-              ],
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    widget.question.typeString,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  const Icon(
+                    Icons.indeterminate_check_box_rounded,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
             ),
           ),
           getOptions(),
@@ -248,26 +272,28 @@ class _TFOptionsState extends State<TFOptions> {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      primary: false,
-      mainAxisSpacing: 20,
-      crossAxisSpacing: 20,
-      padding: const EdgeInsets.all(20.0),
-      crossAxisCount: 2,
-      children: [
-        OptionButton(
-          "True",
-          onPressed: () => buttonPressCallback("true"),
-          backgroundColor: Colors.blueAccent,
-          selected: widget.question.answer == "true",
-        ),
-        OptionButton(
-          "False",
-          onPressed: () => buttonPressCallback("false"),
-          backgroundColor: Colors.redAccent,
-          selected: widget.question.answer == "false",
-        ),
-      ],
+    return Expanded(
+      child: GridView.count(
+        primary: false,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        padding: const EdgeInsets.all(20.0),
+        crossAxisCount: 2,
+        children: [
+          OptionButton(
+            "True",
+            onPressed: () => buttonPressCallback("true"),
+            backgroundColor: Colors.blueAccent,
+            selected: widget.question.answer == "true",
+          ),
+          OptionButton(
+            "False",
+            onPressed: () => buttonPressCallback("false"),
+            backgroundColor: Colors.redAccent,
+            selected: widget.question.answer == "false",
+          ),
+        ],
+      ),
     );
   }
 }
@@ -348,34 +374,36 @@ class _SingleChoiceOptionsState extends State<SingleChoiceOptions> {
               ) as Widget;
             }).toList() +
             [
-              Container(
-                margin: const EdgeInsets.all(2),
-                decoration: const BoxDecoration(
-                  border: DashedBorder.fromBorderSide(
-                      side: BorderSide(
-                        color: Color(0xff181b23),
-                        width: 4,
+              options.length < 6
+                  ? Container(
+                      margin: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        border: DashedBorder.fromBorderSide(
+                            side: BorderSide(
+                              color: Color(0xff181b23),
+                              width: 4,
+                            ),
+                            dashLength: 10),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
-                      dashLength: 10),
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                ),
-                child: IconButton(
-                  onPressed: () {
-                    addOption();
-                  },
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                  ),
-                  icon: const Icon(
-                    Icons.add,
-                    color: Color(0xff181b23),
-                    size: 60,
-                  ),
-                ),
-              )
+                      child: IconButton(
+                        onPressed: () {
+                          addOption();
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                        ),
+                        icon: const Icon(
+                          Icons.add,
+                          color: Color(0xff181b23),
+                          size: 60,
+                        ),
+                      ),
+                    )
+                  : const SizedBox()
             ],
       ),
     );
@@ -464,8 +492,161 @@ class _MultipleChoiceOptionsState extends State<MultipleChoiceOptions> {
               ) as Widget;
             }).toList() +
             [
-              Container(
-                margin: const EdgeInsets.all(2),
+              options.length < 6
+                  ? Container(
+                      margin: const EdgeInsets.all(2),
+                      decoration: const BoxDecoration(
+                        border: DashedBorder.fromBorderSide(
+                            side: BorderSide(
+                              color: Color(0xff181b23),
+                              width: 4,
+                            ),
+                            dashLength: 10),
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          addOption();
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.0),
+                          ),
+                        ),
+                        icon: const Icon(
+                          Icons.add,
+                          color: Color(0xff181b23),
+                          size: 60,
+                        ),
+                      ),
+                    )
+                  : const SizedBox()
+            ],
+      ),
+    );
+  }
+}
+
+class ReorderOptions extends StatefulWidget {
+  const ReorderOptions({
+    super.key,
+    required this.question,
+    required this.updater,
+  });
+
+  final Question question;
+  final Future<void> Function() updater;
+
+  @override
+  State<ReorderOptions> createState() => _ReorderOptionsState();
+}
+
+class _ReorderOptionsState extends State<ReorderOptions> {
+  List<String> options = [];
+
+  @override
+  void initState() {
+    options = widget.question.options;
+
+    super.initState();
+  }
+
+  Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (BuildContext context, Widget? child) {
+        final double animValue = Curves.easeInOut.transform(animation.value);
+        final double elevation = lerpDouble(0, 6, animValue)!;
+        return Material(
+          elevation: elevation,
+          color: Colors.transparent,
+          shadowColor: Colors.black.withOpacity(0.7),
+          child: child,
+        );
+      },
+      child: child,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        ReorderableListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          onReorder: (int oldIndex, int newIndex) {
+            setState(() {
+              if (oldIndex < newIndex) {
+                newIndex -= 1;
+              }
+              final String item = options.removeAt(oldIndex);
+              options.insert(newIndex, item);
+            });
+
+            widget.question.answer = options.join(",");
+            widget.updater();
+          },
+          proxyDecorator: proxyDecorator,
+          children: widget.question.options.asMap().entries.map((entry) {
+            final index = entry.key;
+            final option = entry.value;
+
+            final controller = TextEditingController();
+            controller.text = option;
+
+            return Card(
+              key: ValueKey(index),
+              color: colors[index],
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: controller,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Option $index",
+                          hintStyle: const TextStyle(
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        onEditingComplete: () {
+                          final index = options.indexOf(option);
+                          options[index] = controller.text;
+                          widget.updater();
+                        },
+                      ),
+                    ),
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: const Icon(
+                        Icons.drag_handle,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ) as Widget;
+          }).toList(),
+        ),
+        options.length < 6
+            ? Container(
+                key: const ValueKey("addOption"),
+                margin: const EdgeInsets.symmetric(horizontal: 26, vertical: 6),
+                padding: const EdgeInsets.all(0),
                 decoration: const BoxDecoration(
                   border: DashedBorder.fromBorderSide(
                       side: BorderSide(
@@ -477,7 +658,9 @@ class _MultipleChoiceOptionsState extends State<MultipleChoiceOptions> {
                 ),
                 child: IconButton(
                   onPressed: () {
-                    addOption();
+                    setState(() {
+                      options.add("");
+                    });
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.transparent,
@@ -488,12 +671,12 @@ class _MultipleChoiceOptionsState extends State<MultipleChoiceOptions> {
                   icon: const Icon(
                     Icons.add,
                     color: Color(0xff181b23),
-                    size: 60,
+                    size: 30,
                   ),
                 ),
               )
-            ],
-      ),
+            : const SizedBox(),
+      ],
     );
   }
 }

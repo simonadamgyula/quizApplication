@@ -34,6 +34,14 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   String? answer;
+  List<String> options = [];
+
+  @override
+  void initState() {
+    options = widget.question.options;
+    options.shuffle();
+    super.initState();
+  }
 
   void callback(String answer) {
     setState(() {
@@ -47,15 +55,15 @@ class _QuestionPageState extends State<QuestionPage> {
           callback: callback,
         ),
       1 => SingleChoiceQuestion(
-          options: widget.question.options,
+          options: options,
           callback: callback,
         ),
       2 => MultipleChoiceQuestion(
-          options: widget.question.options,
+          options: options,
           callback: callback,
         ),
       3 => ReorderQuestion(
-          options: widget.question.options,
+          options: options,
           callback: callback,
         ),
       _ => throw UnimplementedError(),
