@@ -1,6 +1,20 @@
-import 'package:flutter/material.dart';
+import 'dart:developer';
 
+import 'package:flutter/material.dart';
+import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
+import 'package:quiz_app/api.dart';
+
+import '../authentication.dart';
 import '../quiz.dart';
+
+const List<Color> colors = [
+  Colors.red,
+  Colors.blueAccent,
+  Color(0xFFDDC400),
+  Colors.green,
+  Colors.purple,
+  Colors.deepOrangeAccent
+];
 
 class QuestionEditPage extends StatefulWidget {
   const QuestionEditPage({
@@ -19,10 +33,13 @@ class QuestionEditPage extends StatefulWidget {
 class _QuestionEditPageState extends State<QuestionEditPage> {
   int type = 0;
 
+  final TextEditingController questionController = TextEditingController();
+
   @override
   void initState() {
     setState(() {
       type = widget.question.type;
+      questionController.text = widget.question.question;
     });
     super.initState();
   }
@@ -33,6 +50,42 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
       type = value;
     });
     Navigator.pop(context);
+    editQuestion().catchError((error) {
+      log(error.toString());
+    });
+  }
+
+  Widget getOptions() {
+    return switch (widget.question.type) {
+      0 => TFOptions(
+          question: widget.question,
+          updater: editQuestion,
+        ),
+      1 => SingleChoiceOptions(
+          question: widget.question,
+          updater: editQuestion,
+        ),
+      _ => const SizedBox(),
+    };
+  }
+
+  Future<void> editQuestion() async {
+    final response = await sendApiRequest(
+      "/quiz/questions/edit",
+      {
+        "id": widget.question.id,
+        "question": widget.question.question,
+        "answer": widget.question.answer,
+        "options": widget.question.options,
+        "type": widget.question.type,
+      },
+      authToken: Session().getToken(),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          "Error while updating question: ${response.statusCode.toString()}");
+    }
   }
 
   void showTypeSelect() {
@@ -44,9 +97,18 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
           child: GridView.count(
             crossAxisCount: 3,
             children: [
-              TypeSelectButton("True or false", callback: typeSelectCallback, icon: Icons.indeterminate_check_box_sharp, value: 0),
-              TypeSelectButton("Single choice", callback: typeSelectCallback, icon: Icons.indeterminate_check_box_sharp, value: 1),
-              TypeSelectButton("Multiple choice", callback: typeSelectCallback, icon: Icons.indeterminate_check_box_sharp, value: 2)
+              TypeSelectButton("True or false",
+                  callback: typeSelectCallback,
+                  icon: Icons.indeterminate_check_box_sharp,
+                  value: 0),
+              TypeSelectButton("Single choice",
+                  callback: typeSelectCallback,
+                  icon: Icons.indeterminate_check_box_sharp,
+                  value: 1),
+              TypeSelectButton("Multiple choice",
+                  callback: typeSelectCallback,
+                  icon: Icons.indeterminate_check_box_sharp,
+                  value: 2)
             ],
           ),
         );
@@ -70,6 +132,25 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
       ),
       body: Column(
         children: [
+          TextField(
+            controller: questionController,
+            decoration: const InputDecoration(
+              hintText: "Question",
+              hintStyle: TextStyle(
+                color: Colors.grey,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            style: const TextStyle(
+              color: Colors.white,
+            ),
+            onEditingComplete: () {
+              widget.question.question = questionController.text;
+              editQuestion().catchError((error) {
+                log(error.toString());
+              });
+            },
+          ),
           MaterialButton(
             onPressed: () {
               showTypeSelect();
@@ -82,7 +163,8 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
                 ),
               ],
             ),
-          )
+          ),
+          getOptions(),
         ],
       ),
     );
@@ -90,7 +172,11 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
 }
 
 class TypeSelectButton extends StatelessWidget {
-  const TypeSelectButton(this.text, {super.key, required this.callback, required this.icon, required this.value});
+  const TypeSelectButton(this.text,
+      {super.key,
+      required this.callback,
+      required this.icon,
+      required this.value});
 
   final String text;
   final void Function(int) callback;
@@ -118,5 +204,274 @@ class TypeSelectButton extends StatelessWidget {
       ),
     );
   }
+}
 
+class TFOptions extends StatefulWidget {
+  const TFOptions({super.key, required this.question, required this.updater});
+
+  final Question question;
+  final Future<void> Function() updater;
+
+  @override
+  State<TFOptions> createState() => _TFOptionsState();
+}
+
+class _TFOptionsState extends State<TFOptions> {
+  String answer = "";
+
+  @override
+  void initState() {
+    setState(() {
+      answer = widget.question.answer!;
+    });
+    super.initState();
+  }
+
+  void buttonPressCallback(String answer) {
+    log(answer);
+    widget.question.answer = answer;
+    setState(() {
+      this.answer = answer;
+    });
+    widget.updater();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GridView.count(
+        primary: false,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        padding: const EdgeInsets.all(20.0),
+        crossAxisCount: 2,
+        children: [
+          OptionButton(
+            "True",
+            onPressed: () => buttonPressCallback("true"),
+            backgroundColor: Colors.blueAccent,
+            selected: widget.question.answer == "true",
+          ),
+          OptionButton(
+            "False",
+            onPressed: () => buttonPressCallback("false"),
+            backgroundColor: Colors.redAccent,
+            selected: widget.question.answer == "false",
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SingleChoiceOptions extends StatefulWidget {
+  const SingleChoiceOptions(
+      {super.key, required this.question, required this.updater});
+
+  final Question question;
+  final Future<void> Function() updater;
+
+  @override
+  State<SingleChoiceOptions> createState() => _SingleChoiceOptionsState();
+}
+
+class _SingleChoiceOptionsState extends State<SingleChoiceOptions> {
+  String answer = "";
+
+  @override
+  void initState() {
+    setState(() {
+      answer = widget.question.answer!;
+    });
+    super.initState();
+  }
+
+  void buttonPressCallback(String answer) {
+    log(answer);
+    widget.question.answer = answer;
+    setState(() {
+      this.answer = answer;
+    });
+    widget.updater();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GridView.count(
+        primary: false,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        padding: const EdgeInsets.all(20.0),
+        crossAxisCount: 2,
+        children: widget.question.options.asMap().entries.map((entry) {
+              final index = entry.key;
+              final option = entry.value;
+              return EditableOptionButton(
+                option,
+                onPressed: () => buttonPressCallback(option),
+                backgroundColor: colors[index],
+                selected: widget.question.answer == option,
+                onEdited: () {},
+                index: index,
+              ) as Widget;
+            }).toList() +
+            [
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.all(2),
+                  decoration: const BoxDecoration(
+                    border: DashedBorder.fromBorderSide(
+                        side: BorderSide(
+                          color: Color(0xff181b23),
+                          width: 4,
+                        ),
+                        dashLength: 10),
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                  child: IconButton(
+                    onPressed: () {},
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                    ),
+                    icon: const Icon(
+                      Icons.add,
+                      color: Color(0xff181b23),
+                      size: 60,
+                    ),
+                  ),
+                ),
+              )
+            ],
+      ),
+    );
+  }
+}
+
+class OptionButton extends StatelessWidget {
+  const OptionButton(
+    this.text, {
+    super.key,
+    required this.onPressed,
+    required this.backgroundColor,
+    required this.selected,
+  });
+
+  final String text;
+  final void Function() onPressed;
+  final Color backgroundColor;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        TextButton(
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            backgroundColor: backgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+          ),
+          child: Text(
+            text,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+        Positioned(
+          top: 10,
+          left: 10,
+          child: selected
+              ? const Icon(
+                  Icons.check_circle_outline,
+                  size: 25,
+                  color: Colors.white,
+                )
+              : const SizedBox(),
+        ),
+      ],
+    );
+  }
+}
+
+class EditableOptionButton extends StatefulWidget {
+  const EditableOptionButton(
+    this.text, {
+    super.key,
+    required this.onPressed,
+    required this.backgroundColor,
+    required this.selected,
+    required this.onEdited,
+    required this.index,
+  });
+
+  final String text;
+  final void Function() onPressed;
+  final void Function() onEdited;
+  final Color backgroundColor;
+  final bool selected;
+  final int index;
+
+  @override
+  State<EditableOptionButton> createState() => _EditableOptionButtonState();
+}
+
+class _EditableOptionButtonState extends State<EditableOptionButton> {
+  final TextEditingController optionController = TextEditingController();
+
+  @override
+  void initState() {
+    optionController.text = widget.text;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        TextButton(
+          onPressed: widget.onPressed,
+          style: TextButton.styleFrom(
+            backgroundColor: widget.backgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16.0),
+            ),
+          ),
+          child: TextField(
+            controller: optionController,
+            decoration: InputDecoration(
+              hintStyle: const TextStyle(
+                color: Colors.grey,
+                fontStyle: FontStyle.italic,
+              ),
+              hintText: "Option ${widget.index}",
+              border: InputBorder.none,
+            ),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Positioned(
+          top: 10,
+          left: 10,
+          child: widget.selected
+              ? const Icon(
+                  Icons.check_circle_outline,
+                  size: 25,
+                  color: Colors.white,
+                )
+              : const SizedBox(),
+        ),
+      ],
+    );
+  }
 }

@@ -177,7 +177,7 @@ packages:
     source: hosted
     version: "1.12.0"
   mobkit_dashed_border:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: mobkit_dashed_border
       sha256: b92b1f0931af3f1335c011333937c7f0b0c798dce7d56ae5dae34c02edd40741

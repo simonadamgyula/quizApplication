@@ -71,11 +71,11 @@ class Question {
 
   final int id;
   final int quizId;
-  final String question;
-  final List<String> options;
+  String question;
+  List<String> options;
   int type;
-  final int index;
-  final String? answer;
+  int index;
+  String? answer;
 
   String get typeString {
     return switch (type) {

@@ -30,6 +30,7 @@ export function getBody(req) {
             body += chunk.toString();
         });
         req.on("end", () => {
+            console.log(body);
             resolve(JSON.parse(body));
         });
     });
