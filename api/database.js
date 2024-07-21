@@ -22,6 +22,8 @@ var client = null;
  */
 function query(text, params) {
     client = new Client(dbConfig);
+    console.log(text);
+    console.log(params);
 
     return new Promise((resolve, reject) => {
         client
@@ -30,7 +32,9 @@ function query(text, params) {
                 client
                     .query(text, params, (err, result) => {
                         if (err) {
-                            throw err;
+                            client.end()
+                            console.log(err);
+                            reject(err);
                         }
                         client.end();
                         resolve(result);
@@ -53,6 +57,7 @@ function checkAuthorization(user_id, quiz_id) {
     return new Promise((resolve, reject) => {
         query('SELECT user_id FROM quizzes WHERE id = $1', [quiz_id])
             .then(result => {
+                console.log(result.rows[0]);
                 resolve(result.rows[0].user_id === user_id);
             })
             .catch(err => {
@@ -228,7 +233,9 @@ export function deleteQuestion(user_id, id) {
  */
 export function editQuestion(user_id, id, question, type, options, answer) {
     return new Promise(async (resolve, reject) => {
-        if (!await checkAuthorization(user_id, id)) {
+        const quiz_id = await getQuizOfQuestion(id);
+
+        if (!await checkAuthorization(user_id, quiz_id)) {
             reject("Unauthorized");
             return;
         }

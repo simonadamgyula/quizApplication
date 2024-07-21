@@ -30,7 +30,7 @@ async function createQuestionHandler(req, res, body) {
 
     const { quiz_id, question, answer, options, type, index } = body;
 
-    createQuestion(user_id, quiz_id, question, type, options, answer, index)
+    createQuestion(user_id, quiz_id, question, type, JSON.stringify(options), answer, index)
         .then(id => {
             Response.OK(res).send({ id });
         })
@@ -74,7 +74,7 @@ async function editQuestionHandler(req, res, body) {
 
     const { id, question, answer, options, type } = body;
 
-    editQuestion(user_id, id, question, type, options, answer)
+    editQuestion(user_id, id, question, type, JSON.stringify(options), answer)
         .then(() => {
             Response.OK(res).send("Question edited");
         }, reason => {

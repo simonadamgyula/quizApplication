@@ -44,6 +44,12 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    questionController.dispose();
+    super.dispose();
+  }
+
   void typeSelectCallback(int value) {
     widget.question.type = value;
     setState(() {
@@ -62,6 +68,10 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
           updater: editQuestion,
         ),
       1 => SingleChoiceOptions(
+          question: widget.question,
+          updater: editQuestion,
+        ),
+      2 => MultipleChoiceOptions(
           question: widget.question,
           updater: editQuestion,
         ),
@@ -238,28 +248,26 @@ class _TFOptionsState extends State<TFOptions> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: GridView.count(
-        primary: false,
-        mainAxisSpacing: 20,
-        crossAxisSpacing: 20,
-        padding: const EdgeInsets.all(20.0),
-        crossAxisCount: 2,
-        children: [
-          OptionButton(
-            "True",
-            onPressed: () => buttonPressCallback("true"),
-            backgroundColor: Colors.blueAccent,
-            selected: widget.question.answer == "true",
-          ),
-          OptionButton(
-            "False",
-            onPressed: () => buttonPressCallback("false"),
-            backgroundColor: Colors.redAccent,
-            selected: widget.question.answer == "false",
-          ),
-        ],
-      ),
+    return GridView.count(
+      primary: false,
+      mainAxisSpacing: 20,
+      crossAxisSpacing: 20,
+      padding: const EdgeInsets.all(20.0),
+      crossAxisCount: 2,
+      children: [
+        OptionButton(
+          "True",
+          onPressed: () => buttonPressCallback("true"),
+          backgroundColor: Colors.blueAccent,
+          selected: widget.question.answer == "true",
+        ),
+        OptionButton(
+          "False",
+          onPressed: () => buttonPressCallback("false"),
+          backgroundColor: Colors.redAccent,
+          selected: widget.question.answer == "false",
+        ),
+      ],
     );
   }
 }
@@ -277,20 +285,36 @@ class SingleChoiceOptions extends StatefulWidget {
 
 class _SingleChoiceOptionsState extends State<SingleChoiceOptions> {
   String answer = "";
+  List<String> options = [];
 
   @override
   void initState() {
     setState(() {
       answer = widget.question.answer!;
+      options = widget.question.options;
     });
     super.initState();
   }
 
   void buttonPressCallback(String answer) {
-    log(answer);
+    if (answer.isEmpty) return;
+
     widget.question.answer = answer;
     setState(() {
       this.answer = answer;
+    });
+    widget.updater();
+  }
+
+  void addOption() {
+    setState(() {
+      options.add("");
+    });
+  }
+
+  void removeOptionCallback(int index) {
+    setState(() {
+      options.removeAt(index);
     });
     widget.updater();
   }
@@ -311,37 +335,160 @@ class _SingleChoiceOptionsState extends State<SingleChoiceOptions> {
                 option,
                 onPressed: () => buttonPressCallback(option),
                 backgroundColor: colors[index],
-                selected: widget.question.answer == option,
-                onEdited: () {},
+                selected: widget.question.answer == option && option.isNotEmpty,
+                onEdited: (String value) {
+                  if (value.isEmpty) return;
+                  setState(() {
+                    options[index] = value;
+                  });
+                  widget.updater();
+                },
                 index: index,
+                removeCallback: removeOptionCallback,
               ) as Widget;
             }).toList() +
             [
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(
-                    border: DashedBorder.fromBorderSide(
-                        side: BorderSide(
-                          color: Color(0xff181b23),
-                          width: 4,
-                        ),
-                        dashLength: 10),
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                  ),
-                  child: IconButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.0),
+              Container(
+                margin: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  border: DashedBorder.fromBorderSide(
+                      side: BorderSide(
+                        color: Color(0xff181b23),
+                        width: 4,
                       ),
+                      dashLength: 10),
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    addOption();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0),
                     ),
-                    icon: const Icon(
-                      Icons.add,
-                      color: Color(0xff181b23),
-                      size: 60,
+                  ),
+                  icon: const Icon(
+                    Icons.add,
+                    color: Color(0xff181b23),
+                    size: 60,
+                  ),
+                ),
+              )
+            ],
+      ),
+    );
+  }
+}
+
+class MultipleChoiceOptions extends StatefulWidget {
+  const MultipleChoiceOptions(
+      {super.key, required this.question, required this.updater});
+
+  final Question question;
+  final Future<void> Function() updater;
+
+  @override
+  State<MultipleChoiceOptions> createState() => _MultipleChoiceOptionsState();
+}
+
+class _MultipleChoiceOptionsState extends State<MultipleChoiceOptions> {
+  List<String> answers = [];
+  List<String> options = [];
+
+  @override
+  void initState() {
+    setState(() {
+      answers = widget.question.answer!.split(",");
+      options = widget.question.options;
+    });
+    super.initState();
+  }
+
+  void buttonPressCallback(String answer) {
+    if (answer.isEmpty) return;
+
+    setState(() {
+      if (answers.contains(answer)) {
+        answers.remove(answer);
+      } else {
+        answers.add(answer);
+      }
+    });
+    widget.question.answer = answers.join(",");
+    widget.updater();
+  }
+
+  void addOption() {
+    setState(() {
+      options.add("");
+    });
+  }
+
+  void removeOptionCallback(int index) {
+    String option = options[index];
+    setState(() {
+      options.removeAt(index);
+      answers.remove(option);
+    });
+    widget.updater();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GridView.count(
+        primary: false,
+        mainAxisSpacing: 20,
+        crossAxisSpacing: 20,
+        padding: const EdgeInsets.all(20.0),
+        crossAxisCount: 2,
+        children: widget.question.options.asMap().entries.map((entry) {
+              final index = entry.key;
+              final option = entry.value;
+              return EditableOptionButton(
+                option,
+                onPressed: () => buttonPressCallback(option),
+                backgroundColor: colors[index],
+                selected: answers.contains(option) && option.isNotEmpty,
+                onEdited: (String value) {
+                  if (value.isEmpty) return;
+                  setState(() {
+                    options[index] = value;
+                  });
+                  widget.updater();
+                },
+                index: index,
+                removeCallback: removeOptionCallback,
+              ) as Widget;
+            }).toList() +
+            [
+              Container(
+                margin: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  border: DashedBorder.fromBorderSide(
+                      side: BorderSide(
+                        color: Color(0xff181b23),
+                        width: 4,
+                      ),
+                      dashLength: 10),
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    addOption();
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0),
                     ),
+                  ),
+                  icon: const Icon(
+                    Icons.add,
+                    color: Color(0xff181b23),
+                    size: 60,
                   ),
                 ),
               )
@@ -408,11 +555,13 @@ class EditableOptionButton extends StatefulWidget {
     required this.selected,
     required this.onEdited,
     required this.index,
+    required this.removeCallback,
   });
 
   final String text;
   final void Function() onPressed;
-  final void Function() onEdited;
+  final void Function(String) onEdited;
+  final void Function(int) removeCallback;
   final Color backgroundColor;
   final bool selected;
   final int index;
@@ -431,6 +580,12 @@ class _EditableOptionButtonState extends State<EditableOptionButton> {
   }
 
   @override
+  void dispose() {
+    optionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
@@ -445,19 +600,25 @@ class _EditableOptionButtonState extends State<EditableOptionButton> {
           ),
           child: TextField(
             controller: optionController,
+            keyboardType: TextInputType.text,
             decoration: InputDecoration(
               hintStyle: const TextStyle(
                 color: Colors.grey,
                 fontStyle: FontStyle.italic,
               ),
-              hintText: "Option ${widget.index}",
+              hintText: "Option ${widget.index + 1}",
               border: InputBorder.none,
             ),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
+            onEditingComplete: () {
+              log("Calling on edited");
+              widget.onEdited(optionController.text);
+            },
             textAlign: TextAlign.center,
+            maxLines: null,
           ),
         ),
         Positioned(
@@ -471,6 +632,20 @@ class _EditableOptionButtonState extends State<EditableOptionButton> {
                 )
               : const SizedBox(),
         ),
+        Positioned(
+          top: 10,
+          right: 10,
+          child: IconButton(
+            icon: const Icon(
+              Icons.close,
+              color: Colors.white,
+              size: 24,
+            ),
+            onPressed: () {
+              widget.removeCallback(widget.index);
+            },
+          ),
+        )
       ],
     );
   }
