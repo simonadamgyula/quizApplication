@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ import 'package:quiz_app/pages/quiz_edit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../authentication.dart';
+import '../colors.dart';
 import '../quiz.dart';
 
 class HomePage extends StatefulWidget {
@@ -198,19 +201,14 @@ class _HomePageState extends State<HomePage> {
           ? ChangeNotifierProvider<Session>(
               create: (context) => Session(),
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Consumer<Session>(
-                      builder: (context, session, child) {
-                        if (session.getToken() == null) {
-                          return LoginButton(session: session);
-                        }
+                child: Consumer<Session>(
+                  builder: (context, session, child) {
+                    if (session.getToken() == null) {
+                      return LoginButton(session: session);
+                    }
 
-                        return QuizList(session: session);
-                      },
-                    ),
-                  ],
+                    return QuizList(session: session);
+                  },
                 ),
               ),
             )
@@ -330,8 +328,14 @@ class QuizList extends StatelessWidget {
 
         final List<Quiz> quizzes = snapshot.data!;
 
-        return Column(
-          children: quizzes.map((quiz) => QuizPreview(quiz: quiz)).toList(),
+        return Padding(
+          padding: const EdgeInsets.all(10),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: quizzes.map((quiz) => QuizPreview(quiz: quiz)).toList(),
+            ),
+          ),
         );
       },
     );
@@ -345,19 +349,42 @@ class QuizPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final random = Random();
+    Color currentColor = colors[random.nextInt(colors.length)];
+
     return InkWell(
       onTap: () {
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => QuizEditPage(id: quiz.id)));
       },
       child: Container(
-        margin: const EdgeInsets.all(10),
-        padding: const EdgeInsets.all(5),
-        child: Text(
-          quiz.name,
-          style: const TextStyle(
-            color: Colors.white,
-          ),
+        margin: const EdgeInsets.all(4),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xff181b23),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              margin: const EdgeInsets.only(right: 20),
+              decoration: BoxDecoration(
+                color: currentColor.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Icon(
+                Icons.crop_square_rounded,
+                color: currentColor,
+              ),
+            ),
+            Text(
+              quiz.name,
+              style: const TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
     );

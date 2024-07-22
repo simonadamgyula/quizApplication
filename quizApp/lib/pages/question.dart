@@ -4,16 +4,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/pages/finished_quiz.dart';
 
+import '../colors.dart';
 import '../quiz.dart';
-
-const List<Color> colors = [
-  Colors.red,
-  Colors.blueAccent,
-  Color(0xFFDDC400),
-  Colors.green,
-  Colors.purple,
-  Colors.deepOrangeAccent
-];
 
 class QuestionPage extends StatefulWidget {
   const QuestionPage(

@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:quiz_app/api.dart';
 import 'package:quiz_app/pages/quiz_edit.dart';
 
 import '../authentication.dart';
+import '../colors.dart';
 
 class QuizAddPage extends StatelessWidget {
   const QuizAddPage({super.key});
@@ -56,6 +58,9 @@ class QuizCreateForm extends StatelessWidget {
                 if (!_formKey.currentState!.validate()) {
                   return;
                 }
+
+                final random = math.Random();
+                Color currentColor = colors[random.nextInt(colors.length)];
 
                 final response = await sendApiRequest(
                     "/quiz/new", {"name": nameController.text},

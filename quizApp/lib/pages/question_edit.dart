@@ -2,20 +2,20 @@ import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
 import 'package:quiz_app/api.dart';
 
 import '../authentication.dart';
+import '../colors.dart';
 import '../quiz.dart';
 
-const List<Color> colors = [
-  Colors.red,
-  Colors.blueAccent,
-  Color(0xFFDDC400),
-  Colors.green,
-  Colors.purple,
-  Colors.deepOrangeAccent
-];
+const Map<int, String> typeToIcon = {
+  0: "assets/img/TF.svg",
+  1: "assets/img/single choice.svg",
+  2: "assets/img/multiple choice.svg",
+  3: "assets/img/reorder.svg",
+};
 
 class QuestionEditPage extends StatefulWidget {
   const QuestionEditPage({
@@ -105,28 +105,35 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
 
   void showTypeSelect() {
     showModalBottomSheet(
+      backgroundColor: const Color(0xff181b23),
       context: context,
       builder: (BuildContext context) {
         return Container(
           padding: const EdgeInsets.all(20),
           child: GridView.count(
+            mainAxisSpacing: 6,
+            crossAxisSpacing: 6,
             crossAxisCount: 3,
             children: [
               TypeSelectButton("True or false",
                   callback: typeSelectCallback,
                   icon: Icons.indeterminate_check_box_sharp,
+                  iconPath: "assets/img/TF.svg",
                   value: 0),
               TypeSelectButton("Single choice",
                   callback: typeSelectCallback,
                   icon: Icons.indeterminate_check_box_sharp,
+                  iconPath: "assets/img/single choice.svg",
                   value: 1),
               TypeSelectButton("Multiple choice",
                   callback: typeSelectCallback,
                   icon: Icons.indeterminate_check_box_sharp,
+                  iconPath: "assets/img/multiple choice.svg",
                   value: 2),
               TypeSelectButton("Reorder",
                   callback: typeSelectCallback,
                   icon: Icons.indeterminate_check_box_sharp,
+                  iconPath: "assets/img/reorder.svg",
                   value: 3),
             ],
           ),
@@ -190,10 +197,7 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
                     widget.question.typeString,
                     style: const TextStyle(color: Colors.white),
                   ),
-                  const Icon(
-                    Icons.indeterminate_check_box_rounded,
-                    color: Colors.white,
-                  ),
+                  SvgPicture.asset(typeToIcon[widget.question.type]!)
                 ],
               ),
             ),
@@ -206,16 +210,20 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
 }
 
 class TypeSelectButton extends StatelessWidget {
-  const TypeSelectButton(this.text,
-      {super.key,
-      required this.callback,
-      required this.icon,
-      required this.value});
+  const TypeSelectButton(
+    this.text, {
+    super.key,
+    required this.callback,
+    required this.icon,
+    required this.value,
+    required this.iconPath,
+  });
 
   final String text;
   final void Function(int) callback;
   final IconData icon;
   final int value;
+  final String iconPath;
 
   @override
   Widget build(BuildContext context) {
@@ -227,13 +235,22 @@ class TypeSelectButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
+        backgroundColor: const Color(0xff0a0a0a),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(text),
-          Icon(icon),
+          Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SvgPicture.asset(iconPath),
         ],
       ),
     );
@@ -274,6 +291,7 @@ class _TFOptionsState extends State<TFOptions> {
   Widget build(BuildContext context) {
     return Expanded(
       child: GridView.count(
+        physics: const ScrollPhysics(),
         primary: false,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
@@ -349,6 +367,7 @@ class _SingleChoiceOptionsState extends State<SingleChoiceOptions> {
   Widget build(BuildContext context) {
     return Expanded(
       child: GridView.count(
+        physics: const ScrollPhysics(),
         primary: false,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
@@ -467,6 +486,7 @@ class _MultipleChoiceOptionsState extends State<MultipleChoiceOptions> {
   Widget build(BuildContext context) {
     return Expanded(
       child: GridView.count(
+        physics: const ScrollPhysics(),
         primary: false,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,

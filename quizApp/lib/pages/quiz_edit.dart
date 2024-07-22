@@ -132,29 +132,33 @@ class Questions extends StatelessWidget {
           );
         }
 
-        return Column(
-          children: [
-            const Text(
-              "Questions",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 30),
+        return Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const Text(
+                  "Questions",
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 30),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: (quiz.questions
+                            .map((question) => QuestionPreview(
+                                  question: question,
+                                  quiz: quiz,
+                                ) as Widget)
+                            .toList()) +
+                        <Widget>[AddQuestionButton(quiz: quiz)],
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: (quiz.questions
-                        .map((question) => QuestionPreview(
-                              question: question,
-                              quiz: quiz,
-                            ) as Widget)
-                        .toList()) +
-                    <Widget>[AddQuestionButton(quiz: quiz)],
-              ),
-            ),
-          ],
+          ),
         );
       },
     );

@@ -82,7 +82,7 @@ class Question {
       0 => "True or False",
       1 => "Single choice",
       2 => "Multiple choice",
-      3 => "Order",
+      3 => "Reorder",
       4 => "Number line",
       5 => "Multiple choice number line",
       6 => "Range",

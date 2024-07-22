@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 76 76" fill="#000000" xmlns="http://www.w3.org/2000/svg">
+  <g style="" transform="matrix(2.1212120056152344, 0, 0, 2.1212120056152344, 3, 3.0000000000000036)">
+    <path d="M33,4.5v24c0,2.484-2.016,4.5-4.5,4.5h-24C2.016,33,0,30.984,0,28.5v-24C0,2.016,2.016,0,4.5,0h24&#10;&#9;&#9;C30.984,0,33,2.016,33,4.5z" style="stroke: rgb(24, 27, 35); stroke-width: 2.82857px;"/>
+  </g>
+  <g style="" transform="matrix(0.8484850525856018, 0, 0, 0.8484850525856018, 9.000000000000007, 24.000000000000004)">
+    <path d="M33,4.5v24c0,2.484-2.016,4.5-4.5,4.5h-24C2.016,33,0,30.984,0,28.5v-24C0,2.016,2.016,0,4.5,0h24&#10;&#9;&#9;C30.984,0,33,2.016,33,4.5z" style="stroke-width: 0px; fill: rgb(68, 138, 255);"/>
+  </g>
+  <g style="" transform="matrix(0.8484850525856018, 0, 0, 0.8484850525856018, 39.00000000000001, 24.000000000000004)">
+    <path d="M33,4.5v24c0,2.484-2.016,4.5-4.5,4.5h-24C2.016,33,0,30.984,0,28.5v-24C0,2.016,2.016,0,4.5,0h24&#10;&#9;&#9;C30.984,0,33,2.016,33,4.5z" style="fill: rgb(244, 67, 54); stroke-width: 0px;"/>
+  </g>
+  <text style="fill: rgb(255, 255, 255); font-family: Arial, sans-serif; font-size: 20px; white-space: pre;" x="16.794" y="45.747" transform="matrix(1, 0, 0, 1, 0, 3.552713678800501e-15)">T</text>
+  <text style="fill: rgb(255, 255, 255); font-family: Arial, sans-serif; font-size: 20px; white-space: pre;" x="47.394" y="45.671" transform="matrix(1, 0, 0, 1, 0, 3.552713678800501e-15)">F</text>
+</svg>
