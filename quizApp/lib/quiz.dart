@@ -10,6 +10,7 @@ class Quiz {
     required this.owner,
     required this.id,
     required this.maxPoints,
+    required this.color,
   });
 
   final int id;
@@ -17,6 +18,7 @@ class Quiz {
   final String owner;
   final int maxPoints;
   List<Question> questions = [];
+  final int color;
 
   Future<void> loadQuestions() async {
     final response = await sendApiRequest(
@@ -46,12 +48,14 @@ class Quiz {
         "name": String name,
         "user_id": String owner,
         "max_points": String maxPoints,
+        "color": String color,
       } =>
         Quiz(
           name: name,
           owner: owner,
           id: int.parse(id),
           maxPoints: int.parse(maxPoints),
+          color: int.parse(color),
         ),
       _ => throw const FormatException('Failed to load quiz.'),
     };

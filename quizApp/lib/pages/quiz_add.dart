@@ -36,68 +36,104 @@ class QuizCreateForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          TextFormField(
-            controller: nameController,
-            decoration: const InputDecoration(
-                labelText: "Name", labelStyle: TextStyle(color: Colors.white)),
-            style: const TextStyle(color: Colors.white),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return "Please enter a name for the quiz";
-              }
-
-              return null;
-            },
-          ),
-          ElevatedButton(
-              onPressed: () async {
-                if (!_formKey.currentState!.validate()) {
-                  return;
-                }
-
-                final random = math.Random();
-                Color currentColor = colors[random.nextInt(colors.length)];
-
-                final response = await sendApiRequest(
-                    "/quiz/new", {"name": nameController.text},
-                    authToken: Session().getToken());
-
-                if (response.statusCode != 200) {
-                  return;
-                }
-
-                log(response.body);
-                final body = jsonDecode(response.body);
-                final id = int.parse(body["id"]);
-
-                log(context.mounted.toString());
-                if (!context.mounted) return;
-
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => QuizEditPage(id: id),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        vertical: 40,
+        horizontal: 20,
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            TextFormField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: "Name",
+                labelStyle: const TextStyle(color: Colors.white),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: (Colors.grey).withOpacity(0.2),
+                    width: 2,
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                side: const BorderSide(
-                  width: 2,
-                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                backgroundColor: Colors.transparent,
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey.withOpacity(0.3),
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey.withOpacity(0.3),
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              child: const Text(
-                "Create",
-                style: TextStyle(
-                  color: Colors.white,
-                ),
-              ))
-        ],
+              style: const TextStyle(color: Colors.white),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Please enter a name for the quiz";
+                }
+
+                return null;
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: ElevatedButton(
+                  onPressed: () async {
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
+
+                    final random = math.Random();
+                    Color currentColor = colors[random.nextInt(colors.length)];
+
+                    final response = await sendApiRequest(
+                        "/quiz/new",
+                        {
+                          "name": nameController.text,
+                          "color": currentColor.value,
+                        },
+                        authToken: Session().getToken());
+
+                    if (response.statusCode != 200) {
+                      return;
+                    }
+
+                    log(response.body);
+                    final body = jsonDecode(response.body);
+                    final id = int.parse(body["id"]);
+
+                    log(context.mounted.toString());
+                    if (!context.mounted) return;
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => QuizEditPage(id: id),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    side: const BorderSide(
+                      width: 2,
+                      color: Colors.white,
+                    ),
+                    backgroundColor: Colors.transparent,
+                  ),
+                  child: const Text(
+                    "Create",
+                    style: TextStyle(
+                      color: Colors.white,
+                    ),
+                  )),
+            )
+          ],
+        ),
       ),
     );
   }

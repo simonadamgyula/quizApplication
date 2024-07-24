@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:developer' as dev;
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +13,6 @@ import 'package:quiz_app/pages/quiz_edit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../authentication.dart';
-import '../colors.dart';
 import '../quiz.dart';
 
 class HomePage extends StatefulWidget {
@@ -96,11 +93,15 @@ class _HomePageState extends State<HomePage> {
         return SimpleDialog(
           contentPadding: const EdgeInsets.all(20),
           backgroundColor: const Color(0xff181b23),
-          children: [
-            const Text(
-              "Fill out quiz",
-              style: TextStyle(color: Colors.white),
+          title: const Text(
+            "Fill out quiz",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
             ),
+          ),
+          children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: controllers.asMap().entries.map((entry) {
@@ -109,9 +110,13 @@ class _HomePageState extends State<HomePage> {
 
                 if (controller == null) {
                   pastDash = true;
-                  return const Text(
-                    "-",
-                    style: TextStyle(color: Colors.white),
+                  return const Padding(
+                    padding: EdgeInsets.all(1),
+                    child: Icon(
+                      Icons.remove,
+                      color: Colors.white,
+                      size: 10,
+                    ),
                   );
                 }
 
@@ -119,10 +124,13 @@ class _HomePageState extends State<HomePage> {
                 FocusNode? next =
                     index == focuses.length ? null : focuses[index];
 
-                return SingleNumberInput(
-                  controller: controller,
-                  focus: current,
-                  nextFocus: next,
+                return Padding(
+                  padding: const EdgeInsets.all(1),
+                  child: SingleNumberInput(
+                    controller: controller,
+                    focus: current,
+                    nextFocus: next,
+                  ),
                 );
               }).toList(),
             ),
@@ -196,20 +204,25 @@ class _HomePageState extends State<HomePage> {
           widget.title,
           style: const TextStyle(color: Colors.white),
         ),
+        actions: [
+          PopupMenuButton(itemBuilder: (context) => <PopupMenuEntry>[
+            const PopupMenuItem(child: Text("Log out"))
+          ],),
+        ],
       ),
       body: finishedInit
           ? ChangeNotifierProvider<Session>(
               create: (context) => Session(),
-              child: Center(
-                child: Consumer<Session>(
-                  builder: (context, session, child) {
-                    if (session.getToken() == null) {
-                      return LoginButton(session: session);
-                    }
+              child: Consumer<Session>(
+                builder: (context, session, child) {
+                  if (session.getToken() == null) {
+                    return Center(
+                      child: LoginButton(session: session),
+                    );
+                  }
 
-                    return QuizList(session: session);
-                  },
-                ),
+                  return QuizList(session: session);
+                },
               ),
             )
           : const CircularProgressIndicator(
@@ -333,6 +346,7 @@ class QuizList extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: quizzes.map((quiz) => QuizPreview(quiz: quiz)).toList(),
             ),
           ),
@@ -349,8 +363,7 @@ class QuizPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final random = Random();
-    Color currentColor = colors[random.nextInt(colors.length)];
+    final currentColor = Color(quiz.color);
 
     return InkWell(
       onTap: () {
@@ -370,7 +383,7 @@ class QuizPreview extends StatelessWidget {
               padding: const EdgeInsets.all(4),
               margin: const EdgeInsets.only(right: 20),
               decoration: BoxDecoration(
-                color: currentColor.withOpacity(0.5),
+                color: currentColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(5),
               ),
               child: Icon(
@@ -419,7 +432,7 @@ class _SingleNumberInputState extends State<SingleNumberInput> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 20,
+      width: 25,
       height: 40,
       child: TextField(
         focusNode: widget.focus,

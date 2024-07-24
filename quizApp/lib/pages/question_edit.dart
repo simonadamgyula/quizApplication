@@ -142,6 +142,16 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
     );
   }
 
+  Future<void> deleteQuestion() async {
+    await sendApiRequest(
+      "/quiz/questions/delete",
+      {
+        "id": widget.question.id,
+      },
+      authToken: Session().getToken(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,57 +163,101 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
             color: Colors.white,
           ),
         ),
+        leading: IconButton(
+          onPressed: () async {
+            if (widget.question.question.isEmpty) {
+              await deleteQuestion();
+            }
+
+            if (!context.mounted) return;
+
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
         backgroundColor: const Color(0xff181b23),
         foregroundColor: Colors.white,
       ),
-      body: Column(
-        children: [
-          TextField(
-            controller: questionController,
-            decoration: const InputDecoration(
-              hintText: "Question",
-              hintStyle: TextStyle(
-                color: Colors.grey,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-            style: const TextStyle(
-              color: Colors.white,
-            ),
-            onEditingComplete: () {
-              widget.question.question = questionController.text;
-              editQuestion().catchError((error) {
-                log(error.toString());
-              });
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: MaterialButton(
-              onPressed: () {
-                showTypeSelect();
-              },
-              padding: const EdgeInsets.all(10),
-              shape: RoundedRectangleBorder(
-                side: const BorderSide(
-                  color: Colors.white,
-                  width: 1,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 40,
+        ),
+        child: Column(
+          children: [
+            TextField(
+              controller: questionController,
+              decoration: InputDecoration(
+                hintText: "Question",
+                hintStyle: const TextStyle(
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
                 ),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    widget.question.typeString,
-                    style: const TextStyle(color: Colors.white),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: (Colors.grey).withOpacity(0.1),
+                    width: 2,
                   ),
-                  SvgPicture.asset(typeToIcon[widget.question.type]!)
-                ],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey.withOpacity(0.1),
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey.withOpacity(0.1),
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              style: const TextStyle(
+                color: Colors.white,
+              ),
+              onEditingComplete: () {
+                widget.question.question = questionController.text;
+                editQuestion().catchError((error) {
+                  log(error.toString());
+                });
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: MaterialButton(
+                onPressed: () {
+                  showTypeSelect();
+                },
+                padding: const EdgeInsets.all(10),
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                    color: (Colors.grey).withOpacity(0.2),
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        widget.question.typeString,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      SvgPicture.asset(typeToIcon[widget.question.type]!)
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
-          getOptions(),
-        ],
+            getOptions(),
+          ],
+        ),
       ),
     );
   }
