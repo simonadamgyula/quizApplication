@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { register, login, authenticate } from './database.js';
+import { register, login, authenticate, logOut } from './database.js';
 import { getBody } from './index.js';
 import { Response } from './response.js';
 
@@ -14,6 +14,8 @@ import { Response } from './response.js';
 export function authenticateUser(req, onFail = () => { }, onSuccess = user_id => { }) {
     const authentication = req.headers.authorization || '';
     const token = authentication.split(" ").pop() || '';
+
+    console.log(authentication);
 
     return new Promise((resolve, reject) => {
         authenticate(token).then(user_id => {
@@ -54,4 +56,24 @@ export async function registerHandler(req, res) {
         .then(() => {
             Response.OK(res).send("User registered");
         });
+}
+
+export async function logoutHandler(req, res) {
+    const authentication = req.headers.authorization || '';
+    const token = authentication.split(" ").pop() || '';
+
+    if (token === "") {
+        console.log(`${token} ${token_split} ${authentication}`);
+        Response.BadRequest(res).send("No token provided");
+        return;
+    }
+
+    logOut(token)
+        .then(() => {
+            Response.OK(res).send("Logged out");
+        })
+        .catch((err) => {
+            console.log(err);
+            Response.BadRequest(res).send("Logout failed: " + err);
+        })
 }

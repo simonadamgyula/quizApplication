@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:quiz_app/api.dart';
 import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
 import 'package:quiz_app/pages/question_edit.dart';
@@ -21,6 +22,8 @@ class QuizEditPage extends StatefulWidget {
 class _QuizEditPageState extends State<QuizEditPage> {
   final TextEditingController nameController = TextEditingController();
   Future<Quiz>? _futureQuiz;
+
+  bool deleting = false;
 
   Future<Quiz> _getQuiz() async {
     final response = await sendApiRequest(
@@ -47,6 +50,72 @@ class _QuizEditPageState extends State<QuizEditPage> {
     super.initState();
   }
 
+  void showDeleteConfirmation() async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text(
+              "Confirm delete",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            content: const Text(
+              "Are you sure you want to delete the quiz?",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            backgroundColor: const Color(0xff181b23),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  setState(() {
+                    deleting = true;
+                  });
+
+                  final response = await sendApiRequest(
+                    "/quiz/delete",
+                    {"id": widget.id},
+                    authToken: Session().getToken(),
+                  );
+
+                  if (response.statusCode != 200) {
+                    Fluttertoast.showToast(
+                      msg: "Failed to delete quiz",
+                      toastLength: Toast.LENGTH_SHORT,
+                      timeInSecForIosWeb: 16,
+                      gravity: ToastGravity.BOTTOM,
+                      backgroundColor: Colors.red,
+                    );
+                  }
+
+                  if (!context.mounted) return;
+
+                  Navigator.popUntil(context, (route) => route.isFirst);
+                },
+                child: deleting
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        "Delete",
+                        style: TextStyle(color: Colors.red),
+                      ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ],
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -54,6 +123,17 @@ class _QuizEditPageState extends State<QuizEditPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xff000000),
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            onPressed: () async {
+              showDeleteConfirmation();
+            },
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+          )
+        ],
       ),
       body: FutureBuilder<Quiz>(
         future: _futureQuiz,

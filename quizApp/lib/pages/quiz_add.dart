@@ -28,11 +28,19 @@ class QuizAddPage extends StatelessWidget {
   }
 }
 
-class QuizCreateForm extends StatelessWidget {
-  QuizCreateForm({super.key});
+class QuizCreateForm extends StatefulWidget {
+  const QuizCreateForm({super.key});
 
+  @override
+  State<QuizCreateForm> createState() => _QuizCreateFormState();
+}
+
+class _QuizCreateFormState extends State<QuizCreateForm> {
   final _formKey = GlobalKey<FormState>();
+
   final nameController = TextEditingController();
+
+  bool creating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -125,12 +133,16 @@ class QuizCreateForm extends StatelessWidget {
                     ),
                     backgroundColor: Colors.transparent,
                   ),
-                  child: const Text(
-                    "Create",
-                    style: TextStyle(
-                      color: Colors.white,
-                    ),
-                  )),
+                  child: creating
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text(
+                          "Create",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        )),
             )
           ],
         ),

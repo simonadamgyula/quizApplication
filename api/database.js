@@ -73,9 +73,9 @@ function checkAuthorization(user_id, quiz_id) {
  * @param {string} code 
  * @returns {Promise<void>}
  */
-export function createQuiz(quiz, user_id, code) {
+export function createQuiz(quiz, user_id, code, color) {
     return new Promise((resolve, reject) => {
-        query('INSERT INTO quizzes (name, user_id, code) VALUES ($1, $2, $3) RETURNING id', [quiz, user_id, code])
+        query('INSERT INTO quizzes (name, user_id, code, color) VALUES ($1, $2, $3, $4) RETURNING id', [quiz, user_id, code, color])
             .then(result => {
                 resolve(result.rows[0].id);
             })
@@ -365,6 +365,7 @@ function getQuizOfQuestion(question_id) {
     return new Promise((resolve, reject) => {
         query('SELECT quiz_id FROM questions WHERE id = $1', [question_id])
             .then(result => {
+                console.log(result.rows[0])
                 resolve(result.rows[0].quiz_id);
             })
             .catch(err => {
@@ -490,5 +491,17 @@ export function deleteQuiz(user_id, quiz_id) {
             .catch(err => {
                 reject(err);
             });
+    });
+}
+
+export function logOut(token) {
+    return new Promise((resolve, reject) => {
+        query('DELETE FROM tokens WHERE token = $1', [token])
+            .then(() => {
+                resolve();
+            })
+            .catch(err => {
+                reject(err);
+            })
     });
 }

@@ -1,4 +1,5 @@
 import "dart:convert";
+import "dart:developer";
 
 import "package:flutter/cupertino.dart";
 import "package:quiz_app/api.dart";
@@ -19,10 +20,34 @@ class Session extends ChangeNotifier {
   String? getToken() {
     return session["token"];
   }
+
+  void notify() {
+    notifyListeners();
+  }
+
+  Future<void> logOut() async {
+    final response = await sendApiRequest(
+      "/logout",
+      {},
+      authToken: getToken(),
+    );
+    log(response.statusCode.toString());
+
+    if (response.statusCode != 200) {
+      throw Exception("Could not log out");
+    }
+
+    session.remove("token");
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove("token");
+
+    notifyListeners();
+  }
 }
 
 Future<String?> logIn(String username, String password) async {
-  final response = await sendApiRequest("/login", {"username": username, "password": password});
+  final response = await sendApiRequest(
+      "/login", {"username": username, "password": password});
 
   if (response.statusCode != 200) {
     return null;
@@ -30,4 +55,20 @@ Future<String?> logIn(String username, String password) async {
 
   final body = jsonDecode(response.body);
   return body["token"];
+}
+
+Future<String?> register(String username, String password) async {
+  final response = await sendApiRequest(
+    "/register",
+    {
+      "username": username,
+      "password": password,
+    },
+  );
+
+  if (response.statusCode == 200) {
+    return await logIn(username, password);
+  }
+
+  throw Exception(response.body);
 }

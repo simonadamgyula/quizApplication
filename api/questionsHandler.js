@@ -57,6 +57,7 @@ async function deleteQuestionHandler(req, res, body) {
     if (!user_id) return;
 
     const { id } = body;
+    console.log("adfsa" + id);
 
     deleteQuestion(user_id, id)
         .then(() => {

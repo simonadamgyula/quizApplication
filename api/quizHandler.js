@@ -1,6 +1,6 @@
 import { Response } from "./response.js";
 import { getBody } from "./index.js";
-import { createQuiz, getQuizByCode, getQuizById, getQuizzes } from "./database.js";
+import { createQuiz, getQuizByCode, getQuizById, getQuizzes, deleteQuiz } from "./database.js";
 import { questionsHandler } from "./questionsHandler.js";
 import { authenticateUser } from "./authentication.js";
 import { answerHandler } from "./answerHandler.js";
@@ -88,11 +88,11 @@ async function newQuiz(req, res, body) {
     });
     if (!user_id) return;
 
-    const { name } = body;
+    const { name, color } = body;
 
     const code = Math.random().toString().substring(2, 10);
 
-    createQuiz(name, user_id, code)
+    createQuiz(name, user_id, code, color)
         .then(id => {
             Response.OK(res).send({ id });
         });

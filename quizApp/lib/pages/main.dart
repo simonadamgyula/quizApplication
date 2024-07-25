@@ -1,15 +1,18 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:quiz_app/api.dart';
 import 'package:quiz_app/pages/login.dart';
 import 'package:quiz_app/pages/quiz.dart';
 import 'package:quiz_app/pages/quiz_add.dart';
 import 'package:quiz_app/pages/quiz_edit.dart';
+import 'package:quiz_app/pages/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../authentication.dart';
@@ -196,110 +199,197 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xff000000),
-      appBar: AppBar(
-        backgroundColor: const Color(0xff181b23),
-        title: Text(
-          widget.title,
-          style: const TextStyle(color: Colors.white),
+    return ChangeNotifierProvider<Session>(
+      create: (context) => Session(),
+      child: Scaffold(
+        backgroundColor: const Color(0xff000000),
+        appBar: AppBar(
+          backgroundColor: const Color(0xff181b23),
+          title: Text(
+            widget.title,
+            style: const TextStyle(color: Colors.white),
+          ),
+          actions: [
+            Consumer<Session>(
+              builder: (context, session, child) {
+                if (session.getToken() != null) {
+                  return PopupMenuButton(
+                    icon: const Icon(Icons.account_circle),
+                    iconColor: Colors.white,
+                    color: const Color(0xff1d212b),
+                    itemBuilder: (context) => <PopupMenuEntry>[
+                      PopupMenuItem(
+                        child: const Text(
+                          "Log out",
+                          style: TextStyle(
+                            color: Colors.red,
+                          ),
+                        ),
+                        onTap: () {
+                          Session().logOut().catchError((error) {
+                            log(error.toString());
+                            Fluttertoast.showToast(
+                              msg: error.toString(),
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
+                          });
+                        },
+                      ),
+                    ],
+                  );
+                }
+
+                return PopupMenuButton(
+                  icon: const Icon(Icons.login),
+                  iconColor: Colors.white,
+                  color: const Color(0xff1d212b),
+                  itemBuilder: (context) => <PopupMenuEntry>[
+                    PopupMenuItem(
+                      child: const Text(
+                        "Log in",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      onTap: () async {
+                        final token = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                const LoginPage(),
+                          ),
+                        );
+
+                        if (!context.mounted) return;
+
+                        session.setToken(token);
+                      },
+                    ),
+                    PopupMenuItem(
+                      child: const Text(
+                        "Register",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      onTap: () async {
+                        final token = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                const RegisterPage(),
+                          ),
+                        );
+
+                        if (!context.mounted) return;
+
+                        session.setToken(token);
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
         ),
-        actions: [
-          PopupMenuButton(itemBuilder: (context) => <PopupMenuEntry>[
-            const PopupMenuItem(child: Text("Log out"))
-          ],),
-        ],
-      ),
-      body: finishedInit
-          ? ChangeNotifierProvider<Session>(
-              create: (context) => Session(),
-              child: Consumer<Session>(
+        body: finishedInit
+            ? Consumer<Session>(
                 builder: (context, session, child) {
                   if (session.getToken() == null) {
-                    return Center(
-                      child: LoginButton(session: session),
+                    return const Center(
+                      child: Text(
+                        "You are not logged in",
+                        style: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
                     );
                   }
 
                   return QuizList(session: session);
                 },
+              )
+            : const CircularProgressIndicator(
+                color: Colors.white,
               ),
-            )
-          : const CircularProgressIndicator(
-              color: Colors.white,
-            ),
-      floatingActionButtonLocation: ExpandableFab.location,
-      floatingActionButton: ExpandableFab(
-        key: _key,
-        type: ExpandableFabType.up,
-        childrenAnimation: ExpandableFabAnimation.none,
-        distance: 70,
-        childrenOffset: const Offset(-3, 10),
-        overlayStyle: ExpandableFabOverlayStyle(
-          color: Colors.white.withOpacity(0.1),
-        ),
-        openButtonBuilder: RotateFloatingActionButtonBuilder(
-          child: const Icon(Icons.add),
-          fabSize: ExpandableFabSize.regular,
-          foregroundColor: Colors.white,
-          backgroundColor: const Color(0xff6dd35e),
-          shape: const CircleBorder(),
-        ),
-        closeButtonBuilder: DefaultFloatingActionButtonBuilder(
-          child: const Icon(Icons.close),
-          fabSize: ExpandableFabSize.small,
-          foregroundColor: Colors.black,
-          backgroundColor: Colors.white,
-        ),
-        children: [
-          Row(
-            children: [
-              const Text(
-                "Create",
-                style: TextStyle(color: Colors.white),
-              ),
-              const SizedBox(width: 10),
-              FloatingActionButton.small(
-                heroTag: null,
-                onPressed: () {
-                  if (Session().getToken() == null) return;
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const QuizAddPage(),
-                    ),
-                  );
-                },
-                backgroundColor: const Color(0xff6dd35e),
-                foregroundColor: Colors.white,
-                child: const Icon(Icons.add_circle_outline),
-              ),
-            ],
+        floatingActionButtonLocation: ExpandableFab.location,
+        floatingActionButton: ExpandableFab(
+          key: _key,
+          type: ExpandableFabType.up,
+          childrenAnimation: ExpandableFabAnimation.none,
+          distance: 70,
+          childrenOffset: const Offset(-3, 10),
+          overlayStyle: ExpandableFabOverlayStyle(
+            color: Colors.white.withOpacity(0.1),
           ),
-          Row(
-            children: [
-              const Text(
-                "Fill out",
-                style: TextStyle(color: Colors.white),
-              ),
-              const SizedBox(width: 10),
-              FloatingActionButton.small(
-                heroTag: null,
-                onPressed: () {
-                  final state = _key.currentState;
-                  if (state != null) {
-                    state.toggle();
-                  }
-                  _openQuizCodeDialog(context);
-                },
-                backgroundColor: const Color(0xff2f91e7),
-                foregroundColor: Colors.white,
-                child: const Icon(Icons.checklist),
-              ),
-            ],
-          )
-        ],
+          openButtonBuilder: RotateFloatingActionButtonBuilder(
+            child: const Icon(Icons.add),
+            fabSize: ExpandableFabSize.regular,
+            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xff6dd35e),
+            shape: const CircleBorder(),
+          ),
+          closeButtonBuilder: DefaultFloatingActionButtonBuilder(
+            child: const Icon(Icons.close),
+            fabSize: ExpandableFabSize.small,
+            foregroundColor: Colors.black,
+            backgroundColor: Colors.white,
+          ),
+          children: [
+            Row(
+              children: [
+                const Text(
+                  "Create",
+                  style: TextStyle(color: Colors.white),
+                ),
+                const SizedBox(width: 10),
+                FloatingActionButton.small(
+                  heroTag: null,
+                  onPressed: () {
+                    if (Session().getToken() == null) return;
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const QuizAddPage(),
+                      ),
+                    );
+                  },
+                  backgroundColor: const Color(0xff6dd35e),
+                  foregroundColor: Colors.white,
+                  child: const Icon(Icons.add_circle_outline),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                const Text(
+                  "Fill out",
+                  style: TextStyle(color: Colors.white),
+                ),
+                const SizedBox(width: 10),
+                FloatingActionButton.small(
+                  heroTag: null,
+                  onPressed: () {
+                    final state = _key.currentState;
+                    if (state != null) {
+                      state.toggle();
+                    }
+                    _openQuizCodeDialog(context);
+                  },
+                  backgroundColor: const Color(0xff2f91e7),
+                  foregroundColor: Colors.white,
+                  child: const Icon(Icons.checklist),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -460,29 +550,6 @@ class _SingleNumberInputState extends State<SingleNumberInput> {
           fontSize: 10,
         ),
       ),
-    );
-  }
-}
-
-class LoginButton extends StatelessWidget {
-  const LoginButton({super.key, required this.session});
-
-  final Session session;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () async {
-        final token = await Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
-
-        if (!context.mounted) return;
-
-        session.setToken(token);
-      },
-      icon: const Icon(Icons.login),
     );
   }
 }
