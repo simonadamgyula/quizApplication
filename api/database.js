@@ -8,7 +8,9 @@ const dbConfig = {
     password: process.env.DB_PASS,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
-    database: process.env.DB_NAME
+    database: process.env.DB_NAME,
+    idleTimeoutMillis: 0,
+    connectionTimeoutMillis: 0,
 }
 
 var client = null;

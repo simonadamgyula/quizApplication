@@ -457,8 +457,12 @@ class QuizPreview extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => QuizEditPage(id: quiz.id)));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => QuizEditPage(id: quiz.id),
+              settings: const RouteSettings(name: "quiz_edit"),
+            ));
       },
       child: Container(
         margin: const EdgeInsets.all(4),

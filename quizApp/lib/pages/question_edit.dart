@@ -3,6 +3,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart';
 import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
 import 'package:quiz_app/api.dart';
 
@@ -35,6 +37,7 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
   int type = 0;
 
   final TextEditingController questionController = TextEditingController();
+  bool deleting = false;
 
   @override
   void initState() {
@@ -142,14 +145,83 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
     );
   }
 
-  Future<void> deleteQuestion() async {
-    await sendApiRequest(
+  Future<Response> deleteQuestion() async {
+    return await sendApiRequest(
       "/quiz/questions/delete",
       {
         "id": widget.question.id,
       },
       authToken: Session().getToken(),
     );
+  }
+
+  void showDeleteConfirmation() async {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text(
+              "Confirm delete",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            content: const Text(
+              "Are you sure you want to delete the quiz?",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            backgroundColor: const Color(0xff181b23),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  setState(() {
+                    deleting = true;
+                  });
+
+                  final response = await deleteQuestion();
+
+                  setState(() {
+                    deleting = false;
+                  });
+
+                  if (response.statusCode != 200) {
+                    Fluttertoast.showToast(
+                      msg: "Failed to delete quiz",
+                      toastLength: Toast.LENGTH_SHORT,
+                      timeInSecForIosWeb: 16,
+                      gravity: ToastGravity.BOTTOM,
+                      backgroundColor: Colors.red,
+                    );
+                  }
+
+                  if (!context.mounted) return;
+
+                  Navigator.popUntil(
+                    context,
+                    ModalRoute.withName("quiz_edit"),
+                  );
+                },
+                child: deleting
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        "Delete",
+                        style: TextStyle(color: Colors.red),
+                      ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "Cancel",
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ],
+          );
+        });
   }
 
   @override
@@ -163,6 +235,17 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
             color: Colors.white,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              showDeleteConfirmation();
+            },
+            icon: const Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+          )
+        ],
         leading: IconButton(
           onPressed: () async {
             if (widget.question.question.isEmpty) {
@@ -500,6 +583,7 @@ class _MultipleChoiceOptionsState extends State<MultipleChoiceOptions> {
 
   @override
   void initState() {
+    log(widget.question.options.toString());
     setState(() {
       answers = widget.question.answer!.split(",");
       options = widget.question.options;

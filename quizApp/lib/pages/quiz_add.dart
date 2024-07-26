@@ -24,7 +24,7 @@ class QuizAddPage extends StatelessWidget {
           backgroundColor: const Color(0xff181b23),
           foregroundColor: Colors.white,
         ),
-        body: QuizCreateForm());
+        body: const QuizCreateForm());
   }
 }
 
@@ -92,57 +92,58 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
             Padding(
               padding: const EdgeInsets.all(20),
               child: ElevatedButton(
-                  onPressed: () async {
-                    if (!_formKey.currentState!.validate()) {
-                      return;
-                    }
+                onPressed: () async {
+                  if (!_formKey.currentState!.validate()) {
+                    return;
+                  }
 
-                    final random = math.Random();
-                    Color currentColor = colors[random.nextInt(colors.length)];
+                  final random = math.Random();
+                  Color currentColor = colors[random.nextInt(colors.length)];
 
-                    final response = await sendApiRequest(
-                        "/quiz/new",
-                        {
-                          "name": nameController.text,
-                          "color": currentColor.value,
-                        },
-                        authToken: Session().getToken());
+                  final response = await sendApiRequest(
+                      "/quiz/new",
+                      {
+                        "name": nameController.text,
+                        "color": currentColor.value,
+                      },
+                      authToken: Session().getToken());
 
-                    if (response.statusCode != 200) {
-                      return;
-                    }
+                  if (response.statusCode != 200) {
+                    return;
+                  }
 
-                    log(response.body);
-                    final body = jsonDecode(response.body);
-                    final id = int.parse(body["id"]);
+                  log(response.body);
+                  final body = jsonDecode(response.body);
+                  final id = int.parse(body["id"]);
 
-                    log(context.mounted.toString());
-                    if (!context.mounted) return;
+                  log(context.mounted.toString());
+                  if (!context.mounted) return;
 
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => QuizEditPage(id: id),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    side: const BorderSide(
-                      width: 2,
-                      color: Colors.white,
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => QuizEditPage(id: id),
                     ),
-                    backgroundColor: Colors.transparent,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  side: const BorderSide(
+                    width: 2,
+                    color: Colors.white,
                   ),
-                  child: creating
-                      ? const CircularProgressIndicator(
+                  backgroundColor: Colors.transparent,
+                ),
+                child: creating
+                    ? const CircularProgressIndicator(
+                        color: Colors.white,
+                      )
+                    : const Text(
+                        "Create",
+                        style: TextStyle(
                           color: Colors.white,
-                        )
-                      : const Text(
-                          "Create",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        )),
+                        ),
+                      ),
+              ),
             )
           ],
         ),

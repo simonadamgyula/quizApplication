@@ -36,6 +36,7 @@ class _LoginFormState extends State<LoginForm> {
   final TextEditingController passwordController = TextEditingController();
 
   bool submitting = false;
+  String? error;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +47,14 @@ class _LoginFormState extends State<LoginForm> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            error != null
+                ? Text(
+                    error!,
+                    style: const TextStyle(
+                      color: Colors.red,
+                    ),
+                  )
+                : const SizedBox(),
             TextFormField(
               controller: usernameController,
               validator: (value) {
@@ -94,16 +103,25 @@ class _LoginFormState extends State<LoginForm> {
                   }
                   setState(() {
                     submitting = true;
+                    error = null;
                   });
 
                   final token = await logIn(
-                      usernameController.text, passwordController.text);
-                  if (token == null) {
-                    return;
-                  }
+                          usernameController.text, passwordController.text)
+                      .catchError((error) {
+                    setState(() {
+                      error = error.toString();
+                    });
+                    return null;
+                  });
+
                   setState(() {
                     submitting = false;
                   });
+
+                  if (token == null) {
+                    return;
+                  }
 
                   if (!context.mounted) return;
 

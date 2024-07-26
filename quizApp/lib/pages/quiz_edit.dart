@@ -1,7 +1,8 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:quiz_app/api.dart';
 import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
@@ -9,6 +10,11 @@ import 'package:quiz_app/pages/question_edit.dart';
 
 import '../authentication.dart';
 import '../quiz.dart';
+
+extension on String {
+  List<String> splitInHalf() =>
+      [substring(0, (length / 2).floor()), substring((length / 2).floor())];
+}
 
 class QuizEditPage extends StatefulWidget {
   const QuizEditPage({super.key, required this.id});
@@ -21,9 +27,13 @@ class QuizEditPage extends StatefulWidget {
 
 class _QuizEditPageState extends State<QuizEditPage> {
   final TextEditingController nameController = TextEditingController();
-  Future<Quiz>? _futureQuiz;
 
   bool deleting = false;
+  Quiz? quiz;
+
+  void updateCallback() {
+    setState(() {});
+  }
 
   Future<Quiz> _getQuiz() async {
     final response = await sendApiRequest(
@@ -39,15 +49,10 @@ class _QuizEditPageState extends State<QuizEditPage> {
     }
 
     final body = jsonDecode(response.body);
-    return Quiz.fromJson(body);
-  }
-
-  @override
-  void initState() {
     setState(() {
-      _futureQuiz = _getQuiz();
+      quiz = Quiz.fromJson(body);
     });
-    super.initState();
+    return quiz!;
   }
 
   void showDeleteConfirmation() async {
@@ -118,12 +123,79 @@ class _QuizEditPageState extends State<QuizEditPage> {
 
   @override
   Widget build(BuildContext context) {
+    final futureQuiz = _getQuiz();
+
     return Scaffold(
       backgroundColor: const Color(0x00000000),
       appBar: AppBar(
         backgroundColor: const Color(0xff000000),
         foregroundColor: Colors.white,
         actions: [
+          quiz != null
+              ? IconButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            backgroundColor: const Color(0xff181b23),
+                            title: const Text(
+                              "Share code",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                            content: RichText(
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                text: "Your share code is:\n",
+                                style: const TextStyle(color: Colors.white),
+                                children: [
+                                  TextSpan(
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        Clipboard.setData(
+                                          ClipboardData(text: quiz!.code),
+                                        ).then((_) {
+                                          Fluttertoast.showToast(
+                                            msg: "Copied to clipboard!",
+                                            toastLength: Toast.LENGTH_SHORT,
+                                            gravity: ToastGravity.BOTTOM,
+                                          );
+                                        });
+                                      },
+                                    text: quiz!.code.splitInHalf().join("-"),
+                                    style: const TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: 30,
+                                      fontWeight: FontWeight.bold,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text(
+                                  "Close",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              )
+                            ],
+                            actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                          );
+                        });
+                  },
+                  icon: const Icon(
+                    Icons.share,
+                    color: Colors.white,
+                  ),
+                )
+              : const SizedBox(),
           IconButton(
             onPressed: () async {
               showDeleteConfirmation();
@@ -132,11 +204,11 @@ class _QuizEditPageState extends State<QuizEditPage> {
               Icons.delete,
               color: Colors.red,
             ),
-          )
+          ),
         ],
       ),
       body: FutureBuilder<Quiz>(
-        future: _futureQuiz,
+        future: futureQuiz,
         builder: (context, AsyncSnapshot<Quiz> snapshot) {
           if (snapshot.hasError) {
             return Center(
@@ -161,10 +233,9 @@ class _QuizEditPageState extends State<QuizEditPage> {
             );
           }
 
-          final quiz = snapshot.data!;
-          nameController.text = quiz.name;
+          nameController.text = quiz!.name;
 
-          final color = Color(quiz.color);
+          final color = Color(quiz!.color);
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -218,7 +289,7 @@ class _QuizEditPageState extends State<QuizEditPage> {
                 const SizedBox(
                   height: 40,
                 ),
-                Questions(quiz: quiz)
+                Questions(quiz: quiz!, callback: updateCallback)
               ],
             ),
           );
@@ -229,9 +300,14 @@ class _QuizEditPageState extends State<QuizEditPage> {
 }
 
 class Questions extends StatelessWidget {
-  const Questions({super.key, required this.quiz});
+  const Questions({
+    super.key,
+    required this.quiz,
+    required this.callback,
+  });
 
   final Quiz quiz;
+  final void Function() callback;
 
   Future<bool> _futureGetQuestions(Quiz quiz) async {
     await quiz.loadQuestions();
@@ -278,9 +354,15 @@ class Questions extends StatelessWidget {
                             .map((question) => QuestionPreview(
                                   question: question,
                                   quiz: quiz,
+                                  callback: callback,
                                 ) as Widget)
                             .toList()) +
-                        <Widget>[AddQuestionButton(quiz: quiz)],
+                        <Widget>[
+                          AddQuestionButton(
+                            quiz: quiz,
+                            callback: callback,
+                          )
+                        ],
                   ),
                 ),
               ],
@@ -293,9 +375,11 @@ class Questions extends StatelessWidget {
 }
 
 class AddQuestionButton extends StatefulWidget {
-  const AddQuestionButton({super.key, required this.quiz});
+  const AddQuestionButton(
+      {super.key, required this.quiz, required this.callback});
 
   final Quiz quiz;
+  final void Function() callback;
 
   @override
   State<AddQuestionButton> createState() => _AddQuestionButtonState();
@@ -348,10 +432,13 @@ class _AddQuestionButtonState extends State<AddQuestionButton> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  QuestionEditPage(quiz: widget.quiz, question: question),
+              builder: (context) => QuestionEditPage(
+                quiz: widget.quiz,
+                question: question,
+              ),
+              settings: const RouteSettings(name: "question_edit"),
             ),
-          );
+          ).then((_) => widget.callback());
         }
 
         setState(() {
@@ -387,11 +474,16 @@ class _AddQuestionButtonState extends State<AddQuestionButton> {
 }
 
 class QuestionPreview extends StatelessWidget {
-  const QuestionPreview(
-      {super.key, required this.question, required this.quiz});
+  const QuestionPreview({
+    super.key,
+    required this.question,
+    required this.quiz,
+    required this.callback,
+  });
 
   final Quiz quiz;
   final Question question;
+  final void Function() callback;
 
   @override
   Widget build(BuildContext context) {
@@ -402,8 +494,9 @@ class QuestionPreview extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) =>
                 QuestionEditPage(quiz: quiz, question: question),
+            settings: const RouteSettings(name: "question_edit"),
           ),
-        );
+        ).then((_) => callback());
       },
       child: Container(
         height: 60,

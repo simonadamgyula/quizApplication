@@ -50,7 +50,7 @@ Future<String?> logIn(String username, String password) async {
       "/login", {"username": username, "password": password});
 
   if (response.statusCode != 200) {
-    return null;
+    throw Exception(response.body);
   }
 
   final body = jsonDecode(response.body);
