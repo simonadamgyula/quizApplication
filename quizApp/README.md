@@ -1,16 +1,17 @@
-# quiz_app
+# Quim
 
-A new Flutter project.
+An android quiz app. (that is purely made, and not even finished yet)
 
-## Getting Started
+## Usage
+### Api
+1. Write your Supabase API key (anon) with the variable name ``` ANON ```.
+2. Open a terminal in the ``` api ``` folder.
+3. Run ``` npm run start ``` to start the api server. The server runs on port 3000.
 
-This project is a starting point for a Flutter application.
+### Application
+1. In the file ``` lib/http_request.dart ``` change ``` apiUrl ``` to your api url.
+2. Build the app using ``` flutter build apk ``` and install the apk on your android phone.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Notice
+This project is not complete. Lots of features are not in the app. Some features that may be important are not 
+in the app, but will be added in the future. (Ran out of allowed hours for a project on HackClub.)
