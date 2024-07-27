@@ -1,6 +1,6 @@
 # Quim
 
-An android quiz app. (that is purely made, and not even finished yet)
+An android quiz app. (that is poorly made, and not even finished yet)
 
 ## Usage
 ### Api
