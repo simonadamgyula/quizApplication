@@ -49,9 +49,7 @@ class _QuizEditPageState extends State<QuizEditPage> {
     }
 
     final body = jsonDecode(response.body);
-    setState(() {
-      quiz = Quiz.fromJson(body);
-    });
+    quiz = Quiz.fromJson(body);
     return quiz!;
   }
 
@@ -186,7 +184,8 @@ class _QuizEditPageState extends State<QuizEditPage> {
                                 ),
                               )
                             ],
-                            actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                            actionsPadding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 5),
                           );
                         });
                   },
@@ -330,8 +329,10 @@ class Questions extends StatelessWidget {
           );
         }
         if (!snapshot.hasData) {
-          return const CircularProgressIndicator(
-            color: Colors.white,
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
           );
         }
 

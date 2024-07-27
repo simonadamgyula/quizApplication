@@ -55,6 +55,9 @@ export async function registerHandler(req, res) {
     register(username, hashedPassword)
         .then(() => {
             Response.OK(res).send("User registered");
+        })
+        .catch((err) => {
+            Response.BadRequest(res).send("Registration failed: " + err.message);
         });
 }
 

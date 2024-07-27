@@ -43,22 +43,21 @@ class Quiz {
   }
 
   factory Quiz.fromJson(Map<String, dynamic> json) {
-    log(json.toString());
     return switch (json) {
       {
-        "id": String id,
+        "id": int id,
         "name": String name,
         "user_id": String owner,
-        "max_points": String maxPoints,
-        "color": String color,
+        "max_points": int maxPoints,
+        "color": int color,
         "code": String code,
       } =>
         Quiz(
           name: name,
           owner: owner,
-          id: int.parse(id),
-          maxPoints: int.parse(maxPoints),
-          color: int.parse(color),
+          id: id,
+          maxPoints: maxPoints,
+          color: color,
           code: code,
         ),
       _ => throw const FormatException('Failed to load quiz.'),
@@ -99,7 +98,6 @@ class Question {
   }
 
   factory Question.fromJson(Map<String, dynamic> json) {
-    log("Json: ${json.toString()}");
     log(json["id"].runtimeType.toString());
     log(json["quiz_id"].runtimeType.toString());
     log(json["question"].runtimeType.toString());
@@ -107,9 +105,27 @@ class Question {
     log(json["options"].runtimeType.toString());
     log(json["index"].runtimeType.toString());
     log(json["answer"].runtimeType.toString());
+
     return switch (json) {
       {
-        "id": String id,
+        "id": int id,
+        "quiz_id": int quizId,
+        "question": String question,
+        "type": int type,
+        "options": String options,
+        "index": int index,
+        "answer": String answer,
+      } =>
+        Question(
+            id: id,
+            quizId: quizId,
+            question: question,
+            type: type,
+            options: List<String>.from(jsonDecode(options)),
+            index: index,
+            answer: answer),
+      {
+        "id": int id,
         "quiz_id": String quizId,
         "question": String question,
         "type": String type,
@@ -118,7 +134,7 @@ class Question {
         "answer": String answer,
       } =>
         Question(
-            id: int.parse(id),
+            id: id,
             quizId: int.parse(quizId),
             question: question,
             type: int.parse(type),

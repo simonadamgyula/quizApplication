@@ -87,6 +87,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void updateCallback() {
+    setState(() {});
+  }
+
   Future<void> _openQuizCodeDialog(BuildContext context) {
     bool pastDash = false;
 
@@ -311,11 +315,16 @@ class _HomePageState extends State<HomePage> {
                     );
                   }
 
-                  return QuizList(session: session);
+                  return QuizList(
+                    session: session,
+                    updateCallback: updateCallback,
+                  );
                 },
               )
-            : const CircularProgressIndicator(
-                color: Colors.white,
+            : const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                ),
               ),
         floatingActionButtonLocation: ExpandableFab.location,
         floatingActionButton: ExpandableFab(
@@ -396,9 +405,14 @@ class _HomePageState extends State<HomePage> {
 }
 
 class QuizList extends StatelessWidget {
-  const QuizList({super.key, required this.session});
+  const QuizList({
+    super.key,
+    required this.session,
+    required this.updateCallback,
+  });
 
   final Session session;
+  final void Function() updateCallback;
 
   Future<List<Quiz>> getOwnedQuizzes() async {
     final response = await sendApiRequest(
@@ -426,7 +440,11 @@ class QuizList extends StatelessWidget {
           return Text(snapshot.error.toString());
         }
         if (!snapshot.hasData) {
-          return const CircularProgressIndicator(color: Colors.white);
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          );
         }
 
         final List<Quiz> quizzes = snapshot.data!;
@@ -437,7 +455,18 @@ class QuizList extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisAlignment: MainAxisAlignment.start,
-              children: quizzes.map((quiz) => QuizPreview(quiz: quiz)).toList(),
+              children: quizzes.isEmpty
+                  ? [
+                      const Center(
+                        child: Text("You have no quizzes."),
+                      )
+                    ]
+                  : quizzes
+                      .map((quiz) => QuizPreview(
+                            quiz: quiz,
+                            updateCallback: updateCallback,
+                          ))
+                      .toList(),
             ),
           ),
         );
@@ -447,9 +476,14 @@ class QuizList extends StatelessWidget {
 }
 
 class QuizPreview extends StatelessWidget {
-  const QuizPreview({super.key, required this.quiz});
+  const QuizPreview({
+    super.key,
+    required this.quiz,
+    required this.updateCallback,
+  });
 
   final Quiz quiz;
+  final void Function() updateCallback;
 
   @override
   Widget build(BuildContext context) {
@@ -458,11 +492,12 @@ class QuizPreview extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => QuizEditPage(id: quiz.id),
-              settings: const RouteSettings(name: "quiz_edit"),
-            ));
+          context,
+          MaterialPageRoute(
+            builder: (context) => QuizEditPage(id: quiz.id),
+            settings: const RouteSettings(name: "quiz_edit"),
+          ),
+        ).then((_) => updateCallback());
       },
       child: Container(
         margin: const EdgeInsets.all(4),

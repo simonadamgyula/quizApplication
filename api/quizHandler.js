@@ -79,6 +79,9 @@ async function getQuiz(req, res, body) {
     getQuizByCode(code)
         .then(quiz => {
             Response.OK(res).send(quiz);
+        })
+        .catch(() => {
+            Response.NotFound(res).send("Quiz not found");
         });
 }
 

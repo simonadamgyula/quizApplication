@@ -1,49 +1,10 @@
 import bcrypt from 'bcrypt';
-import pg from 'pg';
-const { Client } = pg;
 import { ADMIN_USER } from './utils.js';
 
-const dbConfig = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME,
-    idleTimeoutMillis: 0,
-    connectionTimeoutMillis: 0,
-}
+import { createClient } from '@supabase/supabase-js'
 
-var client = null;
+const supabase = createClient('https://shdjeiwicumactjbalkv.supabase.co', process.env.ANON, { schema: 'public' });
 
-
-/**
- * 
- * @param {string} text 
- * @param {Array} params 
- * @returns {*}
- */
-function query(text, params) {
-    client = new Client(dbConfig);
-    console.log(text);
-    console.log(params);
-
-    return new Promise((resolve, reject) => {
-        client
-            .connect()
-            .then(() => {
-                client
-                    .query(text, params, (err, result) => {
-                        if (err) {
-                            client.end()
-                            console.log(err);
-                            reject(err);
-                        }
-                        client.end();
-                        resolve(result);
-                    });
-            });
-    });
-}
 
 /**
  * 
@@ -56,15 +17,22 @@ function checkAuthorization(user_id, quiz_id) {
         return true;
     }
 
-    return new Promise((resolve, reject) => {
-        query('SELECT user_id FROM quizzes WHERE id = $1', [quiz_id])
-            .then(result => {
-                console.log(result.rows[0]);
-                resolve(result.rows[0].user_id === user_id);
-            })
-            .catch(err => {
-                reject(err);
-            });
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from('quizzes')
+            .select('user_id')
+            .eq('id', quiz_id)
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        if (data.length === 0) {
+            return false;
+        }
+
+        resolve(data[0].user_id === user_id);
     });
 }
 
@@ -76,26 +44,34 @@ function checkAuthorization(user_id, quiz_id) {
  * @returns {Promise<void>}
  */
 export function createQuiz(quiz, user_id, code, color) {
-    return new Promise((resolve, reject) => {
-        query('INSERT INTO quizzes (name, user_id, code, color) VALUES ($1, $2, $3, $4) RETURNING id', [quiz, user_id, code, color])
-            .then(result => {
-                resolve(result.rows[0].id);
-            })
-            .catch(err => {
-                reject(err);
-            });
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from("quizzes")
+            .insert({ name: quiz, user_id: user_id, code: code, color: color, })
+            .select('id');
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve(data[0].id);
     });
 }
 
 export function getQuizzes(user_id) {
-    return new Promise((resolve, reject) => {
-        query('SELECT * FROM quizzes WHERE user_id = $1', [user_id])
-            .then(result => {
-                resolve(result.rows);
-            })
-            .catch(err => {
-                reject(err);
-            });
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from("quizzes")
+            .select('*')
+            .eq('user_id', user_id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve(data);
     });
 
 }
@@ -106,14 +82,23 @@ export async function getQuizById(id, user_id) {
         return;
     }
 
-    return new Promise((resolve, reject) => {
-        query('SELECT * FROM quizzes WHERE id = $1', [id])
-            .then(result => {
-                resolve(result.rows[0]);
-            })
-            .catch(err => {
-                reject(err);
-            });
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from('quizzes')
+            .select('*')
+            .eq('id', id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        if (data.length === 0) {
+            reject("Quiz not found");
+            return;
+        }
+
+        resolve(data[0]);
     })
 }
 
@@ -123,14 +108,18 @@ export async function getQuizById(id, user_id) {
  * @returns {Promise<Object>}
  */
 export function getQuizByCode(code) {
-    return new Promise((resolve, reject) => {
-        query('SELECT * FROM quizzes WHERE code = $1', [code])
-            .then(result => {
-                resolve(result.rows[0]);
-            })
-            .catch(err => {
-                reject(err);
-            });
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from('quizzes')
+            .select('*')
+            .eq('code', code)
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve(data[0]);
     });
 }
 
@@ -146,26 +135,29 @@ export async function getQuestions(quiz_id, user_id) {
         return_answer = true;
     }
 
-    return new Promise((resolve, reject) => {
-        query('SELECT * FROM questions WHERE quiz_id = $1', [quiz_id])
-            .then(result => {
-                const rows = result.rows.map(row => {
-                    return {
-                        id: row.id,
-                        quiz_id: row.quiz_id,
-                        question: row.question,
-                        type: row.type,
-                        options: row.options,
-                        index: row.index,
-                        answer: return_answer ? row.answer : null,
-                    }
-                }
-                )
-                resolve(rows);
-            })
-            .catch(err => {
-                reject(err);
-            });
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from('questions')
+            .select('*')
+            .eq('quiz_id', quiz_id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        const rows = data.map(row => {
+            return {
+                id: row.id,
+                quiz_id: row.quiz_id,
+                question: row.question,
+                type: row.type,
+                options: row.options,
+                index: row.index,
+                answer: return_answer ? row.answer : null,
+            }
+        });
+        resolve(rows);
     });
 }
 
@@ -188,13 +180,29 @@ export function createQuestion(user_id, quiz_id, question, type, options, answer
             return;
         }
 
-        query('INSERT INTO questions (quiz_id, question, type, options, answer, index) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id', [quiz_id, question, type, options, answer, index])
-            .then(result => {
-                resolve(result.rows[0].id);
+        const { data, error } = await supabase
+            .from('questions')
+            .insert({
+                quiz_id: quiz_id,
+                question: question,
+                type: type,
+                options: options,
+                answer: answer,
+                index: index
             })
-            .catch(err => {
-                reject(err);
-            });
+            .select('id');
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        if (data.length === 0) {
+            reject("Failed to create question");
+            return;
+        }
+
+        resolve(data[0].id);
     });
 }
 
@@ -213,13 +221,17 @@ export function deleteQuestion(user_id, id) {
             return;
         }
 
-        query("DELETE FROM questions WHERE id = $1", [id])
-            .then(() => {
-                resolve();
-            })
-            .catch(err => {
-                reject(err);
-            });
+        const { error } = await supabase
+            .from('questions')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve();
     })
 }
 
@@ -242,30 +254,48 @@ export function editQuestion(user_id, id, question, type, options, answer) {
             return;
         }
 
-        query("UPDATE questions SET question = $1, type = $2, options = $3, answer = $4 WHERE id = $5", [question, type, options, answer, id])
-            .then(() => {
-                resolve();
+        const { error } = await supabase
+            .from('questions')
+            .update({
+                question: question,
+                type: type,
+                options: options,
+                answer: answer
             })
-            .catch(err => {
-                reject(err);
-            });
+            .eq('id', id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve();
     });
 }
 
 /**
  * 
  * @param {string} username 
- * @returns {Promise<{hash: string, id: string}>
+ * @returns {Promise<{hash: string, id: string}>}
  */
 export function getHashedPassword(username) {
-    return new Promise((resolve, reject) => {
-        query('SELECT password, id FROM accounts WHERE username = $1', [username])
-            .then(result => {
-                resolve({ hash: result.rows[0].password, id: result.rows[0].id });
-            })
-            .catch(err => {
-                reject(err);
-            });
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from('accounts')
+            .select('password, id')
+            .eq('username', username);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        if (data.length === 0) {
+            reject("User not found");
+            return;
+        }
+
+        resolve({ hash: data[0].password, id: data[0].id });
     });
 }
 
@@ -289,6 +319,7 @@ export async function login(username, password) {
 
                 if (token) {
                     resolve(token);
+                    return;
                 }
             }
 
@@ -305,14 +336,20 @@ export async function login(username, password) {
  * @returns {Promise<void>}
  */
 export function register(username, hashed_password) {
-    return new Promise((resolve, reject) => {
-        query('INSERT INTO accounts (username, password) VALUES ($1, $2)', [username, hashed_password])
-            .then(() => {
-                resolve();
-            })
-            .catch(err => {
-                reject(err);
+    return new Promise(async (resolve, reject) => {
+        const { error } = await supabase
+            .from('accounts')
+            .insert({
+                username: username,
+                password: hashed_password
             });
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve();
     });
 }
 
@@ -322,14 +359,23 @@ export function register(username, hashed_password) {
  * @returns {Promise<string>}
  */
 export function authenticate(token) {
-    return new Promise((resolve, reject) => {
-        query('SELECT account_id FROM tokens WHERE token = $1', [token])
-            .then(result => {
-                resolve(result.rows[0].account_id);
-            })
-            .catch(err => {
-                reject(err);
-            });
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from("tokens")
+            .select("account_id")
+            .eq("token", token);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        if (data.length === 0) {
+            ű
+            reject("Unauthorized");
+        }
+
+        resolve(data[0].account_id);
     });
 }
 
@@ -349,9 +395,11 @@ async function newToken(id) {
         counter += 1;
     }
 
-    await query('INSERT INTO tokens (token, account_id) VALUES ($1, $2)', [result, id])
-        .catch(err => {
-            return null;
+    await supabase
+        .from('tokens')
+        .insert({
+            account_id: id,
+            token: result
         });
 
     return result;
@@ -364,15 +412,23 @@ async function newToken(id) {
  * @returns {Promise<number>}
  */
 function getQuizOfQuestion(question_id) {
-    return new Promise((resolve, reject) => {
-        query('SELECT quiz_id FROM questions WHERE id = $1', [question_id])
-            .then(result => {
-                console.log(result.rows[0])
-                resolve(result.rows[0].quiz_id);
-            })
-            .catch(err => {
-                reject(err);
-            });
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from('questions')
+            .select('quiz_id')
+            .eq('id', question_id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        if (data.length === 0) {
+            reject("Question not found");
+            return
+        }
+
+        resolve(data[0].quiz_id);
     });
 }
 
@@ -384,20 +440,23 @@ function getQuizOfQuestion(question_id) {
  * @returns {Promise<Object>}
  */
 export function getAnswerById(answer_id, user_id) {
-    return new Promise((resolve, reject) => {
-        query('SELECT * FROM answers WHERE id = $1', [answer_id])
-            .then(async result => {
-                const row = result.rows[0];
-                if (!await checkAuthorization(user_id, question_id) && row.user_id !== user_id) {
-                    reject("Unauthorized");
-                    return;
-                }
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from('answers')
+            .select('*')
+            .eq('id', answer_id);
 
-                resolve(row);
-            })
-            .catch(err => {
-                reject(err);
-            });
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        if (data[0].account_id !== user_id) {
+            reject("Unauthorized");
+            return;
+        }
+
+        resolve(data[0]);
     });
 }
 
@@ -414,13 +473,17 @@ export function getAnswersByQuestionId(question_id, user_id) {
             return;
         }
 
-        query('SELECT * FROM answers WHERE question_id = $1', [question_id])
-            .then(result => {
-                resolve(result.rows);
-            })
-            .catch(err => {
-                reject(err);
-            });
+        const { data, error } = await supabase
+            .from('answers')
+            .select('*')
+            .eq('question_id', question_id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve(data);
     });
 }
 
@@ -439,13 +502,21 @@ export function submitAnswer(user_id, quiz_id, answers, score_earned) {
             return;
         }
 
-        query('INSERT INTO answers (account_id, quiz_id, answers, scores_earned) VALUES ($1, $2, $3, $4)', [user_id, quiz_id, answers, score_earned])
-            .then(() => {
-                resolve();
-            })
-            .catch(err => {
-                reject(err);
+        const { error } = await supabase
+            .from('answers')
+            .insert({
+                account_id: user_id,
+                quiz_id: quiz_id,
+                answers: answers,
+                score_earned: score_earned
             });
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve();
     });
 }
 
@@ -463,13 +534,19 @@ export function editQuiz(user_id, quiz_id, name) {
             return;
         }
 
-        query('UPDATE quizzes SET name = $1 WHERE id = $2', [name, quiz_id])
-            .then(() => {
-                resolve();
+        const { error } = await supabase
+            .from('quizzes')
+            .update({
+                name: name
             })
-            .catch(err => {
-                reject(err);
-            });
+            .eq('id', quiz_id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve();
     });
 }
 
@@ -486,24 +563,32 @@ export function deleteQuiz(user_id, quiz_id) {
             return;
         }
 
-        query('DELETE FROM quizzes WHERE id = $1', [quiz_id])
-            .then(() => {
-                resolve();
-            })
-            .catch(err => {
-                reject(err);
-            });
+        const { error } = await supabase
+            .from('quizzes')
+            .delete()
+            .eq('id', quiz_id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve();
     });
 }
 
 export function logOut(token) {
-    return new Promise((resolve, reject) => {
-        query('DELETE FROM tokens WHERE token = $1', [token])
-            .then(() => {
-                resolve();
-            })
-            .catch(err => {
-                reject(err);
-            })
+    return new Promise(async (resolve, reject) => {
+        const { error } = await supabase
+            .from('tokens')
+            .delete()
+            .eq('token', token);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve();
     });
 }
