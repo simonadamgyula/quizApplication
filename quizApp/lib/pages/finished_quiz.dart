@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../authentication.dart';
+import '../colors.dart';
 import '../quiz.dart';
 
 class FinishedQuizPage extends StatelessWidget {
@@ -15,7 +16,7 @@ class FinishedQuizPage extends StatelessWidget {
   final Quiz quiz;
   final Answer answers;
 
-  Future<double> _submitAnswers() async {
+  Future<Map<String, dynamic>> _submitAnswers() async {
     log("submitting answers");
     final response = await sendApiRequest("/quiz/answers/create",
         {"quiz_id": quiz.id, "answers": answers.answers},
@@ -26,7 +27,8 @@ class FinishedQuizPage extends StatelessWidget {
     }
 
     final body = jsonDecode(response.body);
-    return body["score"].toDouble();
+    log(body.toString());
+    return body;
   }
 
   @override
@@ -45,10 +47,9 @@ class FinishedQuizPage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Text(answers.answers.toString()),
-          FutureBuilder<double>(
+          FutureBuilder<Map<String, dynamic>>(
             future: futureScore,
-            builder: (context, AsyncSnapshot<double> snapshot) {
+            builder: (context, AsyncSnapshot<Map<String, dynamic>> snapshot) {
               if (snapshot.hasError) {
                 return Text(snapshot.error.toString());
               }
@@ -56,7 +57,9 @@ class FinishedQuizPage extends StatelessWidget {
                 return const CircularProgressIndicator(color: Colors.white);
               }
 
-              final double scoreEarned = snapshot.data!;
+              final Map<String, dynamic> data = snapshot.data!;
+              final scoreEarned = data["score"];
+              final details = data["details"];
 
               return Center(
                 child: Column(
@@ -109,6 +112,10 @@ class FinishedQuizPage extends StatelessWidget {
                         ),
                       ),
                     ),
+                    DetailedAnswers(
+                      details: details,
+                      quiz: quiz,
+                    )
                   ],
                 ),
               );
@@ -116,6 +123,76 @@ class FinishedQuizPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class DetailedAnswers extends StatelessWidget {
+  const DetailedAnswers({
+    super.key,
+    required this.details,
+    required this.quiz,
+  });
+
+  final Map<int, List<List<dynamic>>> details;
+  final Quiz quiz;
+
+  Icon statusIcon(bool correct, bool selected) {
+    final binary = (correct ? 1 : 0) + (selected ? 2 : 0);
+
+    return [
+      null,
+      // not selected, not correct
+      const Icon(Icons.close, color: Colors.red),
+      // not selected, correct
+      const Icon(Icons.cancel_outlined, color: Colors.red),
+      // selected, not correct
+      const Icon(Icons.check_circle_outline, color: Colors.green)
+      // selected, correct
+    ][binary]!;
+  }
+
+  Widget questionDetails(Question question, List<List<dynamic>> detail) {
+    return Column(
+      children: [Text(question.question) as Widget] +
+          detail[0].asMap().entries.map((entry) {
+            final option = entry.value;
+            final index = entry.key;
+            final [correct, selected] = detail[1][index];
+
+            return detailOption(option, index, correct, selected);
+          }).toList(),
+    );
+  }
+
+  Widget detailOption(String option, int index, bool correct, bool selected) {
+    return Card(
+      color: colors[index],
+      child: Row(
+        children: [
+          Text(
+            option,
+            style: const TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          statusIcon(correct, selected)
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: details.entries.map((entry) {
+        final id = entry.key;
+        final question =
+            quiz.questions.where((question) => question.id == id).first;
+        final detail = entry.value;
+
+        return questionDetails(question, detail);
+      }).toList(),
     );
   }
 }

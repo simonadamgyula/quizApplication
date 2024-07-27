@@ -77,17 +77,11 @@ async function submitAnswerHandler(req, res, body) {
 
     const { quiz_id, answers } = body;
 
-    var score_earned = 0;
-    try {
-        score_earned = await validateAnswers(quiz_id, answers);
-    } catch (e) {
-        Response.BadRequest(res).send(e.message);
-        return;
-    }
+    const [score_earned, details] = await validateAnswers(quiz_id, answers);
 
     submitAnswer(user_id, quiz_id, answers, score_earned)
         .then(() => {
-            Response.OK(res).send({ score: score_earned });
+            Response.OK(res).send({ score: score_earned, details: details });
         })
         .catch(() => {
             Response.BadRequest(res).send("Failed to submit answer");
@@ -97,44 +91,80 @@ async function submitAnswerHandler(req, res, body) {
 async function validateAnswers(quiz_id, answers) {
     const questions = await getQuestions(quiz_id, ADMIN_USER);
     var scores = [];
+    var details = {};
 
-    if (questions.length !== Object.keys(answers).length) {
-        throw Error("Invalid number of answers");
+    function multiAnswerValidate(answer, question) {
+        const selected = answer.split(",");
+        const correct = question.answer.split(",");
+
+        var score = 0;
+
+        for (let single_selected in selected) {
+            if (!correct.includes(single_selected)) {
+                score--;
+                continue;
+            }
+            score++;
+        }
+
+        scores.push(Math.max(0, score));
     }
 
     for (let i = 0; i < questions.length; i++) {
         const question = questions[i];
+        const options = JSON.parse(question.options);
+        const answer = answers[question.id.toString()];
+
+        if (!answer) {
+            scores.push(0);
+
+            details[question.id] = null;
+
+            continue;
+        }
+
+        console.log(typeof options);
+
         switch (parseInt(question.type)) {
             case 0:
+                scores.push(answer === question.answer ? 1 : 0);
+                details[question.id] = [
+                    ["True", "False"],
+                    [[question.answer === "true", answer === "true"], [question.answer === "false", answer === "false"]],
+                ]
+                break;
             case 1:
-            case 3:
-            case 4:
-            case 6:
-                if (answers[question.id.toString()] !== question.answer) {
-                    scores.push(0);
-                } else {
-                    scores.push(1);
-                }
+                scores.push(answer === question.answer ? 1 : 0);
+                details[question.id] = [
+                    options,
+                    options.map(option => [option === question.answer, option === answer]),
+                ]
                 break;
             case 2:
+                multiAnswerValidate(answer, question);
+                details[question.id] = [
+                    options,
+                    options.map(option => [question.answer.split(",").includes(option), answer.split(",").includes(option)]),
+                ]
+                break;
+            case 3:
+                scores.push(answer === question.answer ? 1 : 0);
+                details[question.id] = [
+                    options,
+                    options.map((option, index) => [index === question.answer.split(",").indexOf(option), index === answer.split(",").indexOf(option)]),
+                ]
+                break;
+            case 4:
+                scores.push(answer === question.answer ? 1 : 0);
+                break;
             case 5:
-                const selected = answers[question.id.toString()].split(",");
-                const correct = question.answer.split(",");
-
-                var score = 0;
-
-                for (let single_selected in selected) {
-                    if (!correct.includes(single_selected)) {
-                        score--;
-                        continue;
-                    }
-                    score++;
-                }
-
-                scores.push(Math.max(0, score));
+                multiAnswerValidate(answer, question);
+                break;
+            case 6:
+                scores.push(answer === question.answer ? 1 : 0);
                 break;
         }
     }
 
-    return scores.reduce((a, b) => a + b, 0);
+    return [scores.reduce((a, b) => a + b, 0), details];
 }
