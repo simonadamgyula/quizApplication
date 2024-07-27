@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:quiz_app/authentication.dart';
+
+import '../authentication.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});

@@ -3,8 +3,8 @@ import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:quiz_app/api.dart';
 
+import '../api.dart';
 import '../authentication.dart';
 import '../quiz.dart';
 

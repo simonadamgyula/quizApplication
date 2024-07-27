@@ -1,7 +1,7 @@
+import 'package:Quim/pages/question.dart';
 import 'package:flutter/material.dart';
-import 'package:quiz_app/authentication.dart';
-import 'package:quiz_app/pages/question.dart';
 
+import '../authentication.dart';
 import '../quiz.dart';
 
 class QuizPage extends StatefulWidget {

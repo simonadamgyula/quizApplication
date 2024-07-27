@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' as math;
 
+import 'package:Quim/pages/quiz_edit.dart';
 import 'package:flutter/material.dart';
-import 'package:quiz_app/api.dart';
-import 'package:quiz_app/pages/quiz_edit.dart';
 
+import '../api.dart';
 import '../authentication.dart';
 import '../colors.dart';
 

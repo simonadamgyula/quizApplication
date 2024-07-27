@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:quiz_app/api.dart';
-import 'package:quiz_app/authentication.dart';
+import 'api.dart';
+import 'authentication.dart';
 
 class Quiz {
   Quiz({

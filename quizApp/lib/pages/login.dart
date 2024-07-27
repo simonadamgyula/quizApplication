@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:quiz_app/authentication.dart';
+
+import '../authentication.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});

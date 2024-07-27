@@ -2,10 +2,10 @@ import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:quiz_app/pages/finished_quiz.dart';
 
 import '../colors.dart';
 import '../quiz.dart';
+import 'finished_quiz.dart';
 
 class QuestionPage extends StatefulWidget {
   const QuestionPage(

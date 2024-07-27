@@ -1,22 +1,22 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:Quim/pages/quiz.dart';
+import 'package:Quim/pages/quiz_add.dart';
+import 'package:Quim/pages/quiz_edit.dart';
+import 'package:Quim/pages/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
-import 'package:quiz_app/api.dart';
-import 'package:quiz_app/pages/login.dart';
-import 'package:quiz_app/pages/quiz.dart';
-import 'package:quiz_app/pages/quiz_add.dart';
-import 'package:quiz_app/pages/quiz_edit.dart';
-import 'package:quiz_app/pages/register.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../api.dart';
 import '../authentication.dart';
 import '../quiz.dart';
+import 'login.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});

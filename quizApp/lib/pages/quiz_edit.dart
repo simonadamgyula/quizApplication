@@ -1,15 +1,16 @@
 import 'dart:convert';
 
+import 'package:Quim/pages/question_edit.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:quiz_app/api.dart';
 import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
-import 'package:quiz_app/pages/question_edit.dart';
 
+import '../api.dart';
 import '../authentication.dart';
 import '../quiz.dart';
+
 
 extension on String {
   List<String> splitInHalf() =>

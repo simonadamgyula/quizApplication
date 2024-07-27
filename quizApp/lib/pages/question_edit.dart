@@ -6,8 +6,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
 import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
-import 'package:quiz_app/api.dart';
 
+import '../api.dart';
 import '../authentication.dart';
 import '../colors.dart';
 import '../quiz.dart';

@@ -1,6 +1,6 @@
+import 'package:Quim/pages/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:quiz_app/pages/main.dart';
 
 void main() {
   runApp(const QuizApp());
