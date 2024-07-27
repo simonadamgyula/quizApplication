@@ -1,6 +1,6 @@
 import { Response } from "./response.js";
 import { getBody } from "./index.js";
-import { createQuiz, getQuizByCode, getQuizById, getQuizzes, deleteQuiz } from "./database.js";
+import { createQuiz, getQuizByCode, getQuizById, getQuizzes, deleteQuiz, editQuiz } from "./database.js";
 import { questionsHandler } from "./questionsHandler.js";
 import { authenticateUser } from "./authentication.js";
 import { answerHandler } from "./answerHandler.js";
@@ -91,11 +91,11 @@ async function newQuiz(req, res, body) {
     });
     if (!user_id) return;
 
-    const { name, color } = body;
+    const { name, description, color } = body;
 
     const code = Math.random().toString().substring(2, 10);
 
-    createQuiz(name, user_id, code, color)
+    createQuiz(name, description, user_id, code, color)
         .then(id => {
             Response.OK(res).send({ id });
         });
@@ -107,9 +107,9 @@ async function editQuizHandler(req, res, body) {
     });
     if (!user_id) return;
 
-    const { id, name } = body;
+    const { id, name, description } = body;
 
-    editQuiz(user_id, id, name)
+    editQuiz(user_id, id, name, description)
         .then(() => {
             Response.OK(res).send("Quiz edited");
         });

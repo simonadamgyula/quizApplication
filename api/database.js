@@ -43,11 +43,11 @@ function checkAuthorization(user_id, quiz_id) {
  * @param {string} code 
  * @returns {Promise<void>}
  */
-export function createQuiz(quiz, user_id, code, color) {
+export function createQuiz(quiz, description, user_id, code, color) {
     return new Promise(async (resolve, reject) => {
         const { data, error } = await supabase
             .from("quizzes")
-            .insert({ name: quiz, user_id: user_id, code: code, color: color, })
+            .insert({ name: quiz, description: description, user_id: user_id, code: code, color: color, })
             .select('id');
 
         if (error) {
@@ -497,21 +497,17 @@ export function getAnswersByQuestionId(question_id, user_id) {
  */
 export function submitAnswer(user_id, quiz_id, answers, score_earned) {
     return new Promise(async (resolve, reject) => {
-        if (!await checkAuthorization(user_id, quiz_id)) {
-            reject("Unauthorized");
-            return;
-        }
-
         const { error } = await supabase
             .from('answers')
             .insert({
                 account_id: user_id,
                 quiz_id: quiz_id,
                 answers: answers,
-                score_earned: score_earned
+                scores_earned: score_earned
             });
 
         if (error) {
+            console.log(error.message);
             reject(error);
             return;
         }
@@ -527,7 +523,7 @@ export function submitAnswer(user_id, quiz_id, answers, score_earned) {
  * @param {string} name 
  * @returns 
  */
-export function editQuiz(user_id, quiz_id, name) {
+export function editQuiz(user_id, quiz_id, name, description) {
     return new Promise(async (resolve, reject) => {
         if (!await checkAuthorization(user_id, quiz_id)) {
             reject("Unauthorized");
@@ -537,7 +533,8 @@ export function editQuiz(user_id, quiz_id, name) {
         const { error } = await supabase
             .from('quizzes')
             .update({
-                name: name
+                name: name,
+                description: description,
             })
             .eq('id', quiz_id);
 

@@ -11,7 +11,6 @@ import '../api.dart';
 import '../authentication.dart';
 import '../quiz.dart';
 
-
 extension on String {
   List<String> splitInHalf() =>
       [substring(0, (length / 2).floor()), substring((length / 2).floor())];
@@ -28,6 +27,7 @@ class QuizEditPage extends StatefulWidget {
 
 class _QuizEditPageState extends State<QuizEditPage> {
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
 
   bool deleting = false;
   Quiz? quiz;
@@ -234,6 +234,7 @@ class _QuizEditPageState extends State<QuizEditPage> {
           }
 
           nameController.text = quiz!.name;
+          descriptionController.text = quiz!.description ?? "";
 
           final color = Color(quiz!.color);
 
@@ -263,6 +264,47 @@ class _QuizEditPageState extends State<QuizEditPage> {
                       fontSize: 20),
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: (Colors.grey).withOpacity(0.1),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey.withOpacity(0.1),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey.withOpacity(0.1),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                TextField(
+                  controller: descriptionController,
+                  maxLines: null,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20),
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    hintText: "Description",
+                    hintStyle: TextStyle(
+                      color: Colors.grey.withOpacity(0.9),
+                      fontStyle: FontStyle.italic,
+                    ),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(
                         color: (Colors.grey).withOpacity(0.1),

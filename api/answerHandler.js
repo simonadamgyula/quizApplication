@@ -88,6 +88,9 @@ async function submitAnswerHandler(req, res, body) {
     submitAnswer(user_id, quiz_id, answers, score_earned)
         .then(() => {
             Response.OK(res).send({ score: score_earned });
+        })
+        .catch(() => {
+            Response.BadRequest(res).send("Failed to submit answer");
         });
 }
 

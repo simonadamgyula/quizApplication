@@ -39,6 +39,7 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
   final _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
 
   bool creating = false;
 
@@ -89,6 +90,39 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
                 return null;
               },
             ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              controller: descriptionController,
+              maxLines: null,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: "Description",
+                labelStyle: const TextStyle(color: Colors.white),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: (Colors.grey).withOpacity(0.2),
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey.withOpacity(0.3),
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.grey.withOpacity(0.3),
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(20),
               child: ElevatedButton(
@@ -104,6 +138,7 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
                       "/quiz/new",
                       {
                         "name": nameController.text,
+                        "description": descriptionController.text,
                         "color": currentColor.value,
                       },
                       authToken: Session().getToken());
@@ -114,7 +149,7 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
 
                   log(response.body);
                   final body = jsonDecode(response.body);
-                  final id = int.parse(body["id"]);
+                  final id = body["id"];
 
                   log(context.mounted.toString());
                   if (!context.mounted) return;

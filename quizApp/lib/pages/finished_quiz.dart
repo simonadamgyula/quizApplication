@@ -63,8 +63,11 @@ class FinishedQuizPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const SizedBox(
+                      height: 20,
+                    ),
                     const Text(
-                      "You have earned: ",
+                      "You have earned:",
                       style: TextStyle(
                         color: CupertinoColors.systemGrey2,
                         fontSize: 30,
@@ -85,11 +88,26 @@ class FinishedQuizPage extends StatelessWidget {
                         fontSize: 35,
                       ),
                     ),
+                    const SizedBox(
+                      height: 40,
+                    ),
                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        side: const BorderSide(
+                          width: 2,
+                          color: Colors.white,
+                        ),
+                        backgroundColor: Colors.transparent,
+                      ),
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text("Continue"),
+                      child: const Text(
+                        "Continue",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ],
                 ),

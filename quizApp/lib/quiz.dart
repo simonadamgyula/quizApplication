@@ -7,6 +7,7 @@ import 'authentication.dart';
 class Quiz {
   Quiz({
     required this.name,
+    this.description,
     required this.owner,
     required this.id,
     required this.maxPoints,
@@ -21,6 +22,7 @@ class Quiz {
   List<Question> questions = [];
   final int color;
   final String code;
+  final String? description;
 
   Future<void> loadQuestions() async {
     final response = await sendApiRequest(
@@ -43,6 +45,7 @@ class Quiz {
   }
 
   factory Quiz.fromJson(Map<String, dynamic> json) {
+    log(json.toString());
     return switch (json) {
       {
         "id": int id,
@@ -51,6 +54,7 @@ class Quiz {
         "max_points": int maxPoints,
         "color": int color,
         "code": String code,
+        "description": String? description,
       } =>
         Quiz(
           name: name,
@@ -59,6 +63,7 @@ class Quiz {
           maxPoints: maxPoints,
           color: color,
           code: code,
+          description: description,
         ),
       _ => throw const FormatException('Failed to load quiz.'),
     };

@@ -62,6 +62,16 @@ class _QuestionPageState extends State<QuestionPage> {
     };
   }
 
+  void endQuiz() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            FinishedQuizPage(quiz: widget.quiz, answers: widget.answers),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final options = getOptions();
@@ -75,19 +85,70 @@ class _QuestionPageState extends State<QuestionPage> {
           widget.quiz.name,
           style: const TextStyle(color: Colors.white),
         ),
+        leading: IconButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text("Confirm quit"),
+                content: const Text(
+                  "Are you sure you want to quit?\n(This will submit your answers)",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      endQuiz();
+                    },
+                    child: const Text(
+                      "Quit",
+                      style: TextStyle(
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            );
+          },
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              widget.question.question,
-              style: const TextStyle(color: Colors.white),
-            ),
-            Text(
-              widget.question.options.toString(),
-              style: const TextStyle(color: Colors.white),
+            Padding(
+              padding: const EdgeInsets.only(
+                top: 20,
+                bottom: 10,
+              ),
+              child: Text(
+                widget.question.question,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
             options,
             IconButton(
@@ -95,13 +156,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 widget.answers.addAnswer(widget.question.id, answer ?? "");
                 if (widget.index + 1 == widget.quiz.questions.length) {
                   log(widget.answers.answers.toString());
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => FinishedQuizPage(
-                          quiz: widget.quiz, answers: widget.answers),
-                    ),
-                  );
+                  endQuiz();
                   return;
                 }
 
@@ -147,6 +202,7 @@ class _TFQuestionState extends State<TFQuestion> {
         crossAxisCount: 2,
         mainAxisSpacing: 20,
         crossAxisSpacing: 20,
+        padding: const EdgeInsets.all(20),
         children: [
           OptionButton(
             "True",
