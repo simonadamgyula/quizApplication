@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:Quim/pages/question_edit.dart';
+import 'package:quim/pages/question_edit.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

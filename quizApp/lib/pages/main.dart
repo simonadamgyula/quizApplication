@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:Quim/pages/quiz.dart';
-import 'package:Quim/pages/quiz_add.dart';
-import 'package:Quim/pages/quiz_edit.dart';
-import 'package:Quim/pages/register.dart';
+import 'package:quim/pages/quiz.dart';
+import 'package:quim/pages/quiz_add.dart';
+import 'package:quim/pages/quiz_edit.dart';
+import 'package:quim/pages/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

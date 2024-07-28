@@ -1,4 +1,4 @@
-import 'package:Quim/pages/main.dart';
+import 'package:quim/pages/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

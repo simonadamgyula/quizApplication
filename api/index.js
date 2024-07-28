@@ -1,7 +1,6 @@
 import http from "http";
 import { Response } from "./response.js";
 import { handleQuiz } from "./quizHandler.js";
-import { loginHandler, logoutHandler, registerHandler } from "./authentication.js";
 import { userHandler } from "./userHandler.js";
 
 http.createServer((req, res) => {

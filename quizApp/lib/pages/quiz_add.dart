@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' as math;
 
-import 'package:Quim/pages/quiz_edit.dart';
+import 'package:quim/pages/quiz_edit.dart';
 import 'package:flutter/material.dart';
 
 import '../api.dart';

@@ -1,4 +1,4 @@
-import 'package:Quim/pages/question.dart';
+import 'package:quim/pages/question.dart';
 import 'package:flutter/material.dart';
 
 import '../authentication.dart';

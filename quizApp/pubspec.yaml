@@ -1,4 +1,4 @@
-name: Quim
+name: quim
 description: "A quiz mobile application"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -43,6 +43,7 @@ dependencies:
   mobkit_dashed_border: ^0.0.6
   flutter_svg: ^2.0.10+1
   fluttertoast: ^8.2.5
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
