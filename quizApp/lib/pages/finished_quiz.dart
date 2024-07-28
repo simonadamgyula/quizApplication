@@ -27,7 +27,6 @@ class FinishedQuizPage extends StatelessWidget {
     }
 
     final body = jsonDecode(response.body);
-    log(body.toString());
     return body;
   }
 
@@ -134,14 +133,16 @@ class DetailedAnswers extends StatelessWidget {
     required this.quiz,
   });
 
-  final Map<int, List<List<dynamic>>> details;
+  final Map<String, dynamic> details;
   final Quiz quiz;
 
   Icon statusIcon(bool correct, bool selected) {
     final binary = (correct ? 1 : 0) + (selected ? 2 : 0);
 
+    log("$binary binary");
+
     return [
-      null,
+      const Icon(Icons.abc, color: Colors.transparent),
       // not selected, not correct
       const Icon(Icons.close, color: Colors.red),
       // not selected, correct
@@ -149,10 +150,10 @@ class DetailedAnswers extends StatelessWidget {
       // selected, not correct
       const Icon(Icons.check_circle_outline, color: Colors.green)
       // selected, correct
-    ][binary]!;
+    ][binary];
   }
 
-  Widget questionDetails(Question question, List<List<dynamic>> detail) {
+  Widget questionDetails(Question question, List<dynamic> detail) {
     return Column(
       children: [Text(question.question) as Widget] +
           detail[0].asMap().entries.map((entry) {
@@ -179,7 +180,7 @@ class DetailedAnswers extends StatelessWidget {
           statusIcon(correct, selected)
         ],
       ),
-    );
+    ) as Widget;
   }
 
   @override
@@ -188,7 +189,7 @@ class DetailedAnswers extends StatelessWidget {
       children: details.entries.map((entry) {
         final id = entry.key;
         final question =
-            quiz.questions.where((question) => question.id == id).first;
+            quiz.questions.where((question) => question.id.toString() == id).first;
         final detail = entry.value;
 
         return questionDetails(question, detail);

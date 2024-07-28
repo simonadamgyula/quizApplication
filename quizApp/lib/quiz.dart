@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
+
 import 'api.dart';
 import 'authentication.dart';
 
@@ -176,5 +178,40 @@ class Answer {
 
   void addAnswer(int id, String answer) {
     answers[id.toString()] = answer;
+  }
+}
+
+class RetrieveAnswer {
+  RetrieveAnswer({
+    required this.id,
+    required this.userId,
+    required this.answeredAt,
+    required this.answers,
+    required this.scoreEarned,
+  });
+
+  final int id;
+  final String userId;
+  final String answeredAt;
+  final Map<String, dynamic> answers;
+  final double scoreEarned;
+
+  factory RetrieveAnswer.fromJson(Map<String, dynamic> json) {
+    return switch (json) {
+      {
+        "id": int id,
+        "account_id": String userId,
+        "answered_at": String answeredAt,
+        "answers": Map<String, dynamic> answers,
+        "scores_earned": double scoreEarned,
+      } =>
+        RetrieveAnswer(
+            id: id,
+            userId: userId,
+            answeredAt: answeredAt,
+            answers: answers,
+            scoreEarned: scoreEarned),
+      _ => throw Exception("Couldn't load answer")
+    };
   }
 }

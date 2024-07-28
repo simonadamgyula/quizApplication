@@ -462,13 +462,13 @@ export function getAnswerById(answer_id, user_id) {
 
 /**
  * 
- * @param {number} question_id 
+ * @param {number} quiz_id 
  * @param {string} user_id 
  * @returns {Promise<Object[]>}
  */
-export function getAnswersByQuestionId(question_id, user_id) {
+export function getAnswersByQuizId(quiz_id, user_id) {
     return new Promise(async (resolve, reject) => {
-        if (!await checkAuthorization(user_id, question_id)) {
+        if (!await checkAuthorization(user_id, quiz_id)) {
             reject("Unauthorized");
             return;
         }
@@ -476,7 +476,7 @@ export function getAnswersByQuestionId(question_id, user_id) {
         const { data, error } = await supabase
             .from('answers')
             .select('*')
-            .eq('question_id', question_id);
+            .eq('quiz_id', quiz_id);
 
         if (error) {
             reject(error);

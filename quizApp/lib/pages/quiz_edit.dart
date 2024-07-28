@@ -10,6 +10,7 @@ import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
 import '../api.dart';
 import '../authentication.dart';
 import '../quiz.dart';
+import 'answers.dart';
 
 extension on String {
   List<String> splitInHalf() =>
@@ -28,6 +29,8 @@ class QuizEditPage extends StatefulWidget {
 class _QuizEditPageState extends State<QuizEditPage> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+
+  Future<Quiz>? _futureQuiz;
 
   bool deleting = false;
   Quiz? quiz;
@@ -50,8 +53,16 @@ class _QuizEditPageState extends State<QuizEditPage> {
     }
 
     final body = jsonDecode(response.body);
-    quiz = Quiz.fromJson(body);
+    setState(() {
+      quiz = Quiz.fromJson(body);
+    });
     return quiz!;
+  }
+
+  @override
+  void initState() {
+    _futureQuiz = _getQuiz();
+    super.initState();
   }
 
   void showDeleteConfirmation() async {
@@ -122,93 +133,110 @@ class _QuizEditPageState extends State<QuizEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    final futureQuiz = _getQuiz();
-
     return Scaffold(
       backgroundColor: const Color(0x00000000),
       appBar: AppBar(
         backgroundColor: const Color(0xff000000),
         foregroundColor: Colors.white,
-        actions: [
-          quiz != null
-              ? IconButton(
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            backgroundColor: const Color(0xff181b23),
-                            title: const Text(
-                              "Share code",
-                              style: TextStyle(color: Colors.white),
+        actions: (quiz != null
+                ? <Widget>[
+                    IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AnswersPage(
+                              quiz: quiz!,
                             ),
-                            content: RichText(
-                              textAlign: TextAlign.center,
-                              text: TextSpan(
-                                text: "Your share code is:\n",
-                                style: const TextStyle(color: Colors.white),
-                                children: [
-                                  TextSpan(
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        Clipboard.setData(
-                                          ClipboardData(text: quiz!.code),
-                                        ).then((_) {
-                                          Fluttertoast.showToast(
-                                            msg: "Copied to clipboard!",
-                                            toastLength: Toast.LENGTH_SHORT,
-                                            gravity: ToastGravity.BOTTOM,
-                                          );
-                                        });
-                                      },
-                                    text: quiz!.code.splitInHalf().join("-"),
-                                    style: const TextStyle(
-                                      color: Colors.grey,
-                                      fontSize: 30,
-                                      fontWeight: FontWeight.bold,
-                                      fontStyle: FontStyle.italic,
+                          ),
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.leaderboard,
+                        color: Colors.white,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                backgroundColor: const Color(0xff181b23),
+                                title: const Text(
+                                  "Share code",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                content: RichText(
+                                  textAlign: TextAlign.center,
+                                  text: TextSpan(
+                                    text: "Your share code is:\n",
+                                    style: const TextStyle(color: Colors.white),
+                                    children: [
+                                      TextSpan(
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            Clipboard.setData(
+                                              ClipboardData(text: quiz!.code),
+                                            ).then((_) {
+                                              Fluttertoast.showToast(
+                                                msg: "Copied to clipboard!",
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                              );
+                                            });
+                                          },
+                                        text:
+                                            quiz!.code.splitInHalf().join("-"),
+                                        style: const TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 30,
+                                          fontWeight: FontWeight.bold,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text(
+                                      "Close",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   )
                                 ],
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                child: const Text(
-                                  "Close",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              )
-                            ],
-                            actionsPadding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 5),
-                          );
-                        });
-                  },
-                  icon: const Icon(
-                    Icons.share,
-                    color: Colors.white,
-                  ),
-                )
-              : const SizedBox(),
-          IconButton(
-            onPressed: () async {
-              showDeleteConfirmation();
-            },
-            icon: const Icon(
-              Icons.delete,
-              color: Colors.red,
-            ),
-          ),
-        ],
+                                actionsPadding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 5),
+                              );
+                            });
+                      },
+                      icon: const Icon(
+                        Icons.share,
+                        color: Colors.white,
+                      ),
+                    )
+                  ]
+                : <Widget>[const SizedBox()]) +
+            [
+              IconButton(
+                onPressed: () async {
+                  showDeleteConfirmation();
+                },
+                icon: const Icon(
+                  Icons.delete,
+                  color: Colors.red,
+                ),
+              ),
+            ],
       ),
       body: FutureBuilder<Quiz>(
-        future: futureQuiz,
+        future: _futureQuiz,
         builder: (context, AsyncSnapshot<Quiz> snapshot) {
           if (snapshot.hasError) {
             return Center(
@@ -294,10 +322,10 @@ class _QuizEditPageState extends State<QuizEditPage> {
                   controller: descriptionController,
                   maxLines: null,
                   style: const TextStyle(
-                      color: Colors.white,
+                      color: Colors.grey,
                       fontStyle: FontStyle.italic,
                       fontWeight: FontWeight.bold,
-                      fontSize: 20),
+                      fontSize: 15),
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
                     hintText: "Description",

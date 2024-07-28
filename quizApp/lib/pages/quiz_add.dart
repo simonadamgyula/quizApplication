@@ -96,7 +96,10 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
             TextFormField(
               controller: descriptionController,
               maxLines: null,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 14,
+              ),
               decoration: InputDecoration(
                 labelText: "Description",
                 labelStyle: const TextStyle(color: Colors.white),

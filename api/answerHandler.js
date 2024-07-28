@@ -1,7 +1,7 @@
 import { Response } from "./response.js";
 import { authenticateUser } from "./authentication.js";
 import { ADMIN_USER } from "./utils.js";
-import { getAnswerById, getAnswersByQuestionId, submitAnswer, getQuestions } from "./database.js";
+import { getAnswerById, getAnswersByQuizId, submitAnswer, getQuestions } from "./database.js";
 
 export function answerHandler(req, res, url, body) {
     switch (url[2]) {
@@ -54,12 +54,21 @@ async function getAllAnswers(req, res, body) {
     });
     if (!user_id) return;
 
-    const { question_id } = body;
+    const { quiz_id } = body;
 
-    getAnswersByQuestionId(question_id, user_id)
-        .then(answers => {
-            Response.OK(res).send(answers);
+    try {
+        const answers = await getAnswersByQuizId(quiz_id, user_id);
+        var details = {};
+        answers.forEach(async (answer) => {
+            const [_, detail] = await validateAnswers(quiz_id, answer.answers);
+            details[answer.id] = detail;
         });
+    } catch (e) {
+        Response.BadRequest(res).send(`Failed to get answers: ${e.message}`);
+        return;
+    }
+
+    Response.OK(res).send({ answers: answers, details: details });
 }
 
 /**
