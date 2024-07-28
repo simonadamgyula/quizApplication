@@ -589,3 +589,24 @@ export function logOut(token) {
         resolve();
     });
 }
+
+export function getUsername(user_id) {
+    return new Promise(async (resolve, reject) => {
+        const { data, error } = await supabase
+            .from('accounts')
+            .select('username')
+            .eq('id', user_id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        if (data.length === 0) {
+            reject("User not found");
+            return;
+        }
+
+        resolve(data[0].username);
+    });
+}

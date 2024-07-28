@@ -2,6 +2,7 @@ import http from "http";
 import { Response } from "./response.js";
 import { handleQuiz } from "./quizHandler.js";
 import { loginHandler, logoutHandler, registerHandler } from "./authentication.js";
+import { userHandler } from "./userHandler.js";
 
 http.createServer((req, res) => {
     const url = req.url.substring(1).split("/");
@@ -11,14 +12,8 @@ http.createServer((req, res) => {
         case "quiz":
             handleQuiz(req, res, url);
             break;
-        case "login":
-            loginHandler(req, res);
-            break;
-        case "register":
-            registerHandler(req, res);
-            break;
-        case "logout":
-            logoutHandler(req, res);
+        case "user":
+            userHandler(req, res, url);
             break;
         default:
             Response.NotFound(res).send("Not found!");

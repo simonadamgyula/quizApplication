@@ -28,7 +28,7 @@ class Session extends ChangeNotifier {
 
   Future<void> logOut() async {
     final response = await sendApiRequest(
-      "/logout",
+      "/user/logout",
       {},
       authToken: getToken(),
     );
@@ -48,7 +48,7 @@ class Session extends ChangeNotifier {
 
 Future<String?> logIn(String username, String password) async {
   final response = await sendApiRequest(
-      "/login", {"username": username, "password": password});
+      "/user/login", {"username": username, "password": password});
 
   if (response.statusCode != 200) {
     throw Exception(response.body);
@@ -60,7 +60,7 @@ Future<String?> logIn(String username, String password) async {
 
 Future<String?> register(String username, String password) async {
   final response = await sendApiRequest(
-    "/register",
+    "/user/register",
     {
       "username": username,
       "password": password,

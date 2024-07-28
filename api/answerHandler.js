@@ -56,17 +56,24 @@ async function getAllAnswers(req, res, body) {
 
     const { quiz_id } = body;
 
+    var answers = [];
+    var details = {};
+
     try {
-        const answers = await getAnswersByQuizId(quiz_id, user_id);
-        var details = {};
-        answers.forEach(async (answer) => {
-            const [_, detail] = await validateAnswers(quiz_id, answer.answers);
-            details[answer.id] = detail;
-        });
+        answers = await getAnswersByQuizId(quiz_id, user_id);
     } catch (e) {
         Response.BadRequest(res).send(`Failed to get answers: ${e.message}`);
         return;
     }
+
+    await Promise.all(answers.map(async (answer) => {
+        return new Promise(async (resolve, reject) => {
+            const [_, detail] = await validateAnswers(quiz_id, answer.answers);
+            details[answer.id] = detail;
+
+            resolve();
+        });
+    }));
 
     Response.OK(res).send({ answers: answers, details: details });
 }
@@ -131,8 +138,6 @@ async function validateAnswers(quiz_id, answers) {
 
             continue;
         }
-
-        console.log(typeof options);
 
         switch (parseInt(question.type)) {
             case 0:

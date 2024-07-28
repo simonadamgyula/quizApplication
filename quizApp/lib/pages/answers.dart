@@ -19,7 +19,7 @@ class AnswersPage extends StatefulWidget {
 }
 
 class _AnswersPageState extends State<AnswersPage> {
-  Map<int, List>? details;
+  Map<String, dynamic>? details;
 
   Future<List<RetrieveAnswer>> getFutureAnswers() async {
     final response = await sendApiRequest(
@@ -35,7 +35,7 @@ class _AnswersPageState extends State<AnswersPage> {
     final body = jsonDecode(response.body);
     details = body["details"];
     return body["answers"]
-        .map((answer) => RetrieveAnswer.fromJson(answer))
+        .map<RetrieveAnswer>((answer) => RetrieveAnswer.fromJson(answer))
         .toList();
   }
 
@@ -44,13 +44,34 @@ class _AnswersPageState extends State<AnswersPage> {
     Future<List<RetrieveAnswer>> futureAnswers = getFutureAnswers();
 
     return Scaffold(
+      backgroundColor: const Color(0x00000000),
       appBar: AppBar(
         title: Text(widget.quiz.name),
+        backgroundColor: const Color(0xff000000),
       ),
       body: FutureBuilder<List<RetrieveAnswer>>(
         future: futureAnswers,
-        builder: (BuildContext context, AsyncSnapshot<List<RetrieveAnswer>> snapshot) {
-          return const SizedBox();
+        builder: (BuildContext context,
+            AsyncSnapshot<List<RetrieveAnswer>> snapshot) {
+          if (snapshot.hasError) {
+            return Text(snapshot.error.toString());
+          }
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+              ),
+            );
+          }
+
+          List<RetrieveAnswer> answers = snapshot.data!;
+
+          return SingleChildScrollView(
+            child: Column(
+              children:
+                  answers.map((answer) => AnswerPreview(answer: answer, details: details![answer.id.toString()],)).toList(),
+            ),
+          );
         },
       ),
     );
@@ -58,11 +79,17 @@ class _AnswersPageState extends State<AnswersPage> {
 }
 
 class AnswerPreview extends StatelessWidget {
-  const AnswerPreview({super.key});
+  const AnswerPreview({
+    super.key,
+    required this.answer,
+    required this.details,
+  });
+
+  final RetrieveAnswer answer;
+  final Map<String, dynamic> details;
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return Text(answer.answers.toString());
   }
 }

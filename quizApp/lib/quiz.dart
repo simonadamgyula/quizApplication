@@ -197,20 +197,26 @@ class RetrieveAnswer {
   final double scoreEarned;
 
   factory RetrieveAnswer.fromJson(Map<String, dynamic> json) {
+    log("reset");
+    log(json["id"].runtimeType.toString());
+    log(json["account_id"].runtimeType.toString());
+    log(json["answered_at"].runtimeType.toString());
+    log(json["answers"].runtimeType.toString());
+    log(json["scores_earned"].runtimeType.toString());
     return switch (json) {
       {
         "id": int id,
         "account_id": String userId,
         "answered_at": String answeredAt,
         "answers": Map<String, dynamic> answers,
-        "scores_earned": double scoreEarned,
+        "scores_earned": int scoreEarned,
       } =>
         RetrieveAnswer(
             id: id,
             userId: userId,
             answeredAt: answeredAt,
             answers: answers,
-            scoreEarned: scoreEarned),
+            scoreEarned: scoreEarned.toDouble()),
       _ => throw Exception("Couldn't load answer")
     };
   }

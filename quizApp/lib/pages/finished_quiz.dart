@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../authentication.dart';
-import '../colors.dart';
+import '../detailed_answers.dart';
 import '../quiz.dart';
 
 class FinishedQuizPage extends StatelessWidget {
@@ -60,6 +60,8 @@ class FinishedQuizPage extends StatelessWidget {
               final scoreEarned = data["score"];
               final details = data["details"];
 
+              log(details.toString());
+
               return Center(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -111,9 +113,11 @@ class FinishedQuizPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    DetailedAnswers(
-                      details: details,
-                      quiz: quiz,
+                    SingleChildScrollView(
+                      child: DetailedAnswers(
+                        details: details,
+                        quiz: quiz,
+                      ),
                     )
                   ],
                 ),
@@ -126,74 +130,4 @@ class FinishedQuizPage extends StatelessWidget {
   }
 }
 
-class DetailedAnswers extends StatelessWidget {
-  const DetailedAnswers({
-    super.key,
-    required this.details,
-    required this.quiz,
-  });
 
-  final Map<String, dynamic> details;
-  final Quiz quiz;
-
-  Icon statusIcon(bool correct, bool selected) {
-    final binary = (correct ? 1 : 0) + (selected ? 2 : 0);
-
-    log("$binary binary");
-
-    return [
-      const Icon(Icons.abc, color: Colors.transparent),
-      // not selected, not correct
-      const Icon(Icons.close, color: Colors.red),
-      // not selected, correct
-      const Icon(Icons.cancel_outlined, color: Colors.red),
-      // selected, not correct
-      const Icon(Icons.check_circle_outline, color: Colors.green)
-      // selected, correct
-    ][binary];
-  }
-
-  Widget questionDetails(Question question, List<dynamic> detail) {
-    return Column(
-      children: [Text(question.question) as Widget] +
-          detail[0].asMap().entries.map((entry) {
-            final option = entry.value;
-            final index = entry.key;
-            final [correct, selected] = detail[1][index];
-
-            return detailOption(option, index, correct, selected);
-          }).toList(),
-    );
-  }
-
-  Widget detailOption(String option, int index, bool correct, bool selected) {
-    return Card(
-      color: colors[index],
-      child: Row(
-        children: [
-          Text(
-            option,
-            style: const TextStyle(
-              color: Colors.white,
-            ),
-          ),
-          statusIcon(correct, selected)
-        ],
-      ),
-    ) as Widget;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: details.entries.map((entry) {
-        final id = entry.key;
-        final question =
-            quiz.questions.where((question) => question.id.toString() == id).first;
-        final detail = entry.value;
-
-        return questionDetails(question, detail);
-      }).toList(),
-    );
-  }
-}
