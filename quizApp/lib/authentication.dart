@@ -54,7 +54,7 @@ Future<String?> logIn(String username, String password) async {
     throw Exception(response.body);
   }
 
-  final body = jsonDecode(response.body);
+  final body = jsonDecode(utf8.decode(response.bodyBytes));
   return body["token"];
 }
 

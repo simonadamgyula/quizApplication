@@ -77,7 +77,7 @@ class _HomePageState extends State<HomePage> {
       throw Exception(response.statusCode.toString());
     }
 
-    final body = jsonDecode(response.body);
+    final body = jsonDecode(utf8.decode(response.bodyBytes));
     return Quiz.fromJson(body);
   }
 
@@ -425,7 +425,7 @@ class QuizList extends StatelessWidget {
       throw Exception("Unable to load your quizzes.");
     }
 
-    final body = jsonDecode(response.body) as List;
+    final body = jsonDecode(utf8.decode(response.bodyBytes)) as List;
     return body.map((quiz) => Quiz.fromJson(quiz)).toList();
   }
 

@@ -3,7 +3,7 @@ export class Response {
         this.res = res;
         this.status = status;
 
-        this.headers = {};
+        this.headers = { "Content-Type": "application/json" };
     }
 
     setHeaders(headers) {
@@ -17,7 +17,7 @@ export class Response {
     send(body) {
         console.log(JSON.stringify(body));
         this.res.writeHead(this.status, this.headers);
-        this.res.write(JSON.stringify(body));
+        this.res.write(JSON.stringify(body), 'utf8');
         this.res.end();
     }
 

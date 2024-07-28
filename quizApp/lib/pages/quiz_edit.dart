@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:quim/pages/question_edit.dart';
 import 'package:flutter/gestures.dart';
@@ -35,7 +36,33 @@ class _QuizEditPageState extends State<QuizEditPage> {
   bool deleting = false;
   Quiz? quiz;
 
+  void updateMaxScore() {
+    if (quiz == null) return;
+
+    int maxScore = 0;
+
+    for (var question in quiz!.questions) {
+      switch (question.type) {
+        case 0:
+        case 1:
+          maxScore++;
+          break;
+        case 2:
+          maxScore += question.answer?.split(",").length ?? 0;
+        case 3:
+          maxScore += question.options.length;
+      }
+    }
+
+    sendApiRequest(
+      "/quiz/set_max_score",
+      {"id": quiz!.id, "max_score": maxScore},
+      authToken: Session().getToken(),
+    );
+  }
+
   void updateCallback() {
+    updateMaxScore();
     setState(() {});
   }
 
@@ -52,7 +79,7 @@ class _QuizEditPageState extends State<QuizEditPage> {
       throw Exception(response.statusCode.toString());
     }
 
-    final body = jsonDecode(response.body);
+    final body = jsonDecode(utf8.decode(response.bodyBytes));
     setState(() {
       quiz = Quiz.fromJson(body);
     });
@@ -478,7 +505,7 @@ class _AddQuestionButtonState extends State<AddQuestionButton> {
       return null;
     }
 
-    final body = jsonDecode(response.body);
+    final body = jsonDecode(utf8.decode(response.bodyBytes));
     return Question.fromJson({
       "id": body["id"],
       "quiz_id": widget.quiz.id.toString(),

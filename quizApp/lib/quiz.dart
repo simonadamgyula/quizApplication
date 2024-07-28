@@ -37,8 +37,7 @@ class Quiz {
       throw Exception("Couldn't load questions");
     }
 
-    final body = jsonDecode(response.body) as List;
-    log(body.toString());
+    final body = jsonDecode(utf8.decode(response.bodyBytes)) as List;
     questions = body.map((question) {
       return Question.fromJson(question);
     }).toList();
@@ -103,14 +102,6 @@ class Question {
   }
 
   factory Question.fromJson(Map<String, dynamic> json) {
-    log(json["id"].runtimeType.toString());
-    log(json["quiz_id"].runtimeType.toString());
-    log(json["question"].runtimeType.toString());
-    log(json["type"].runtimeType.toString());
-    log(json["options"].runtimeType.toString());
-    log(json["index"].runtimeType.toString());
-    log(json["answer"].runtimeType.toString());
-
     return switch (json) {
       {
         "id": int id,

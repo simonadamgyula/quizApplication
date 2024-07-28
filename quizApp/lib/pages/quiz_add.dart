@@ -151,7 +151,7 @@ class _QuizCreateFormState extends State<QuizCreateForm> {
                   }
 
                   log(response.body);
-                  final body = jsonDecode(response.body);
+                  final body = jsonDecode(utf8.decode(response.bodyBytes));
                   final id = body["id"];
 
                   log(context.mounted.toString());

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:intl/intl.dart';
 import 'package:quim/api.dart';
 import 'package:flutter/material.dart';
 import 'package:quim/pages/answer.dart';
@@ -34,7 +35,7 @@ class _AnswersPageState extends State<AnswersPage> {
       throw Exception("Couldn't get answers");
     }
 
-    final body = jsonDecode(response.body);
+    final body = jsonDecode(utf8.decode(response.bodyBytes));
     details = body["details"];
     return body["answers"]
         .map<RetrieveAnswer>((answer) => RetrieveAnswer.fromJson(answer))
@@ -124,7 +125,7 @@ class _AnswerPreviewState extends State<AnswerPreview> {
       throw Exception("Couldn't get username");
     }
 
-    final body = jsonDecode(response.body);
+    final body = jsonDecode(utf8.decode(response.bodyBytes));
     setState(() {
       username = body["username"];
     });
@@ -139,6 +140,9 @@ class _AnswerPreviewState extends State<AnswerPreview> {
 
   @override
   Widget build(BuildContext context) {
+    DateTime answeredAt = DateTime.parse(widget.answer.answeredAt);
+    DateFormat dateFormat = DateFormat("yyyy MMM dd H:m:s");
+
     return InkWell(
       onTap: () {
         if (username != null) {
@@ -161,7 +165,6 @@ class _AnswerPreviewState extends State<AnswerPreview> {
           padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           margin: const EdgeInsets.all(2),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               FutureBuilder(
                 future: _futureUsername,
@@ -195,21 +198,34 @@ class _AnswerPreviewState extends State<AnswerPreview> {
                   );
                 },
               ),
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: Text(
+                  dateFormat.format(answeredAt),
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              const Expanded(
+                child: SizedBox(),
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    "${widget.answer.scoreEarned} / ${widget.quiz.maxPoints}",
+                    "${widget.answer.scoreEarned.toString().replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")} / ${widget.quiz.maxPoints}",
                     style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    "${(widget.answer.scoreEarned / widget.quiz.maxPoints) * 100}%",
+                    "${((widget.answer.scoreEarned / widget.quiz.maxPoints) * 100).toString().replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")}%",
                     style: const TextStyle(
                       color: Colors.grey,
-                      fontSize: 10,
+                      fontSize: 12,
                     ),
                   )
                 ],

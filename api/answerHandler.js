@@ -162,7 +162,13 @@ async function validateAnswers(quiz_id, answers) {
                 ]
                 break;
             case 3:
-                scores.push(answer === question.answer ? 1 : 0);
+                var score = 0;
+                for (let j = 0; j < options.length; j++) {
+                    if (options[j] === question.answer.split(",")[j]) {
+                        score++;
+                    }
+                }
+                scores.push(score);
                 details[question.id] = [
                     options,
                     options.map((option, index) => [index === question.answer.split(",").indexOf(option), index === answer.split(",").indexOf(option)]),

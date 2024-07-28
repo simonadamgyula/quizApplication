@@ -1,6 +1,6 @@
 import { Response } from "./response.js";
 import { getBody } from "./index.js";
-import { createQuiz, getQuizByCode, getQuizById, getQuizzes, deleteQuiz, editQuiz } from "./database.js";
+import { createQuiz, getQuizByCode, getQuizById, getQuizzes, deleteQuiz, editQuiz, setMaxScore } from "./database.js";
 import { questionsHandler } from "./questionsHandler.js";
 import { authenticateUser } from "./authentication.js";
 import { answerHandler } from "./answerHandler.js";
@@ -14,6 +14,9 @@ export function handleQuiz(req, res, url) {
                     break;
                 case "edit":
                     editQuizHandler(req, res, body);
+                    break;
+                case "set_max_score":
+                    setMaxScoreHandler(req, res, body);
                     break;
                 case "delete":
                     deleteQuizHandler(req, res, body);
@@ -53,6 +56,20 @@ async function getAllQuizzes(req, res, body) {
         .then(quizzes => {
             Response.OK(res).send(quizzes);
         });
+}
+
+async function setMaxScoreHandler(req, res, body) {
+    const user_id = await authenticateUser(req, () => {
+        Response.Unauthorized(res).send("Unauthorized");
+    });
+    if (!user_id) return;
+
+    const { id, max_score } = body;
+
+    setMaxScore(user_id, id, max_score)
+        .then(() => {
+            Response.OK(res).send("Max score set");
+        })
 }
 
 async function getOwnedQuiz(req, res, body) {

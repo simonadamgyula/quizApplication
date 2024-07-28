@@ -139,7 +139,8 @@ export async function getQuestions(quiz_id, user_id) {
         const { data, error } = await supabase
             .from('questions')
             .select('*')
-            .eq('quiz_id', quiz_id);
+            .eq('quiz_id', quiz_id)
+            .order('index');
 
         if (error) {
             reject(error);
@@ -608,5 +609,28 @@ export function getUsername(user_id) {
         }
 
         resolve(data[0].username);
+    });
+}
+
+export function setMaxScore(user_id, quiz_id, max_score) {
+    return new Promise(async (resolve, reject) => {
+        if (!await checkAuthorization(user_id, quiz_id)) {
+            reject("Unauthorized");
+            return;
+        }
+
+        const { error } = await supabase
+            .from('quizzes')
+            .update({
+                max_points: max_score
+            })
+            .eq('id', quiz_id);
+
+        if (error) {
+            reject(error);
+            return;
+        }
+
+        resolve();
     });
 }

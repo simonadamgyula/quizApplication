@@ -21,7 +21,7 @@ class DetailedAnswers extends StatelessWidget {
       // not selected, not correct
       const Icon(Icons.close, color: Colors.red),
       // not selected, correct
-      const Icon(Icons.cancel_outlined, color: Colors.red),
+      const Icon(Icons.circle_outlined, color: Colors.red),
       // selected, not correct
       const Icon(Icons.check_circle_outline, color: Colors.green)
       // selected, correct

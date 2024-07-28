@@ -26,7 +26,7 @@ class FinishedQuizPage extends StatelessWidget {
       throw Exception(response.statusCode.toString());
     }
 
-    final body = jsonDecode(response.body);
+    final body = jsonDecode(utf8.decode(response.bodyBytes));
     return body;
   }
 
@@ -62,64 +62,68 @@ class FinishedQuizPage extends StatelessWidget {
 
               log(details.toString());
 
-              return Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    const Text(
-                      "You have earned:",
-                      style: TextStyle(
-                        color: CupertinoColors.systemGrey2,
-                        fontSize: 30,
-                      ),
-                    ),
-                    Text(
-                      "$scoreEarned / ${quiz.maxPoints}",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "${(scoreEarned / quiz.maxPoints) * 100}%",
-                      style: const TextStyle(
-                        color: CupertinoColors.systemGrey,
-                        fontSize: 35,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 40,
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        side: const BorderSide(
-                          width: 2,
-                          color: Colors.white,
+              return Expanded(
+                child: SingleChildScrollView(
+                  child: Center(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          height: 20,
                         ),
-                        backgroundColor: Colors.transparent,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        "Continue",
-                        style: TextStyle(
-                          color: Colors.white,
+                        const Text(
+                          "You have earned:",
+                          style: TextStyle(
+                            color: CupertinoColors.systemGrey2,
+                            fontSize: 30,
+                          ),
                         ),
-                      ),
+                        Text(
+                          "${scoreEarned.toString().replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")} / ${quiz.maxPoints}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 40,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "${((scoreEarned / quiz.maxPoints) * 100).toString().replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")}%",
+                          style: const TextStyle(
+                            color: CupertinoColors.systemGrey,
+                            fontSize: 35,
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 40,
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            side: const BorderSide(
+                              width: 2,
+                              color: Colors.white,
+                            ),
+                            backgroundColor: Colors.transparent,
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text(
+                            "Continue",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        SingleChildScrollView(
+                          child: DetailedAnswers(
+                            details: details,
+                            quiz: quiz,
+                          ),
+                        )
+                      ],
                     ),
-                    SingleChildScrollView(
-                      child: DetailedAnswers(
-                        details: details,
-                        quiz: quiz,
-                      ),
-                    )
-                  ],
+                  ),
                 ),
               );
             },
@@ -129,5 +133,3 @@ class FinishedQuizPage extends StatelessWidget {
     );
   }
 }
-
-

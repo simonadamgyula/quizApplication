@@ -20,7 +20,7 @@ class AnswerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DateTime answeredAt = DateTime.parse(answer.answeredAt);
-    DateFormat dateFormat = DateFormat("yyyy-MM-dd H:m:s");
+    DateFormat dateFormat = DateFormat("yyyy MMM dd H:m:s");
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -28,50 +28,76 @@ class AnswerPage extends StatelessWidget {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
-      body: Column(
-        children: [
-          RichText(
-            text: TextSpan(
-              text: "Answered by ",
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            RichText(
+              text: TextSpan(
+                text: "Answered by ",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                ),
+                children: [
+                  TextSpan(
+                      text: username,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ))
+                ],
               ),
-              children: [
-                TextSpan(
-                    text: username,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ))
-              ],
             ),
-          ),
-          RichText(
-            text: TextSpan(
-              text: "at ",
-              children: [
-                TextSpan(
-                  text: dateFormat.format(answeredAt),
+            RichText(
+              text: TextSpan(
+                text: "at ",
+                children: [
+                  TextSpan(
+                    text: dateFormat.format(answeredAt),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+                style: const TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            RichText(
+              text: TextSpan(
+                  text: answer.scoreEarned
+                      .toString()
+                      .replaceAll(RegExp(r'([.]*0)(?!.*\d)'), ""),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
+                    fontSize: 30,
                   ),
-                ),
-              ],
+                  children: [
+                    TextSpan(
+                        text: " / ${quiz.maxPoints}",
+                        style: const TextStyle(fontWeight: FontWeight.normal))
+                  ]),
+            ),
+            Text(
+              "${((answer.scoreEarned / quiz.maxPoints) * 100).toString().replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")}%",
               style: const TextStyle(
-                color: Colors.white,
+                color: Colors.grey,
+                fontSize: 25,
               ),
             ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          Text("${answer.scoreEarned}/${quiz.maxPoints}"),
-          DetailedAnswers(
-            details: details,
-            quiz: quiz,
-          ),
-        ],
+            SingleChildScrollView(
+              child: DetailedAnswers(
+                details: details,
+                quiz: quiz,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
