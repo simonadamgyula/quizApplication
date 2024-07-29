@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:quim/pages/answer.dart';
 
 import '../authentication.dart';
+import '../colors.dart';
 import '../quiz.dart';
 
 class AnswersPage extends StatefulWidget {
@@ -47,10 +48,10 @@ class _AnswersPageState extends State<AnswersPage> {
     Future<List<RetrieveAnswer>> futureAnswers = getFutureAnswers();
 
     return Scaffold(
-      backgroundColor: const Color(0x00000000),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(widget.quiz.name),
-        backgroundColor: const Color(0xff181b23),
+        backgroundColor: accentColor,
         foregroundColor: Colors.white,
       ),
       body: FutureBuilder<List<RetrieveAnswer>>(
@@ -160,7 +161,7 @@ class _AnswerPreviewState extends State<AnswerPreview> {
         }
       },
       child: Card(
-        color: const Color(0xff181b23),
+        color: accentColor,
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
           margin: const EdgeInsets.all(2),

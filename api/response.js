@@ -15,7 +15,7 @@ export class Response {
     }
 
     send(body) {
-        console.log(JSON.stringify(body));
+        console.log(`${JSON.stringify(body)} response`);
         this.res.writeHead(this.status, this.headers);
         this.res.write(JSON.stringify(body), 'utf8');
         this.res.end();

@@ -10,6 +10,7 @@ import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
 
 import '../api.dart';
 import '../authentication.dart';
+import '../colors.dart';
 import '../quiz.dart';
 import 'answers.dart';
 
@@ -109,7 +110,7 @@ class _QuizEditPageState extends State<QuizEditPage> {
                 color: Colors.white,
               ),
             ),
-            backgroundColor: const Color(0xff181b23),
+            backgroundColor: accentColor,
             actions: [
               TextButton(
                 onPressed: () async {
@@ -161,7 +162,7 @@ class _QuizEditPageState extends State<QuizEditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0x00000000),
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         backgroundColor: const Color(0xff000000),
         foregroundColor: Colors.white,
@@ -189,7 +190,7 @@ class _QuizEditPageState extends State<QuizEditPage> {
                             context: context,
                             builder: (context) {
                               return AlertDialog(
-                                backgroundColor: const Color(0xff181b23),
+                                backgroundColor: accentColor,
                                 title: const Text(
                                   "Share code",
                                   style: TextStyle(color: Colors.white),
@@ -551,7 +552,7 @@ class _AddQuestionButtonState extends State<AddQuestionButton> {
         decoration: const BoxDecoration(
           border: DashedBorder.fromBorderSide(
               side: BorderSide(
-                color: Color(0xff181b23),
+                color: accentColor,
                 width: 4,
               ),
               dashLength: 10),
@@ -603,11 +604,11 @@ class QuestionPreview extends StatelessWidget {
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
           border: Border.all(
-            color: const Color(0xff181b23),
+            color: accentColor,
             width: 2,
           ),
           borderRadius: const BorderRadius.all(Radius.circular(10)),
-          color: const Color(0xff181b23),
+          color: accentColor,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,

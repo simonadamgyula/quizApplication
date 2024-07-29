@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../authentication.dart';
+import '../colors.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
@@ -13,12 +14,12 @@ class RegisterPage extends StatelessWidget {
           'Register',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: const Color(0xff181b23),
+        backgroundColor: accentColor,
         foregroundColor: Colors.white,
         centerTitle: true,
       ),
       body: const Center(child: RegisterForm()),
-      backgroundColor: const Color(0x00000000),
+      backgroundColor: backgroundColor,
     );
   }
 }

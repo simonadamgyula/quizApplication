@@ -28,8 +28,7 @@ export function authenticateUser(req, onFail = () => { }, onSuccess = user_id =>
     });
 }
 
-export async function loginHandler(req, res) {
-    const body = await getBody(req);
+export async function loginHandler(req, res, body) {
     const { username, password } = body;
 
     login(username, password)
@@ -45,8 +44,7 @@ export async function loginHandler(req, res) {
             });
 }
 
-export async function registerHandler(req, res) {
-    const body = await getBody(req);
+export async function registerHandler(req, res, body) {
     const { username, password } = body;
 
     const salt = await bcrypt.genSalt(10);

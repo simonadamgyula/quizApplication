@@ -15,13 +15,13 @@ class QuizAddPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0x00000000),
+        backgroundColor: backgroundColor,
         appBar: AppBar(
           title: const Text(
             "Create quiz",
             style: TextStyle(color: Colors.white),
           ),
-          backgroundColor: const Color(0xff181b23),
+          backgroundColor: accentColor,
           foregroundColor: Colors.white,
         ),
         body: const QuizCreateForm());

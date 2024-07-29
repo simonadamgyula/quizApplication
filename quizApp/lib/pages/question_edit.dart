@@ -17,6 +17,7 @@ const Map<int, String> typeToIcon = {
   1: "assets/img/single choice.svg",
   2: "assets/img/multiple choice.svg",
   3: "assets/img/reorder.svg",
+  4: "assets/img/reorder.svg",
 };
 
 class QuestionEditPage extends StatefulWidget {
@@ -83,6 +84,10 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
           question: widget.question,
           updater: editQuestion,
         ),
+      4 => NumberLine(
+          question: widget.question,
+          updater: editQuestion,
+        ),
       _ => const SizedBox(),
     };
   }
@@ -108,7 +113,7 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
 
   void showTypeSelect() {
     showModalBottomSheet(
-      backgroundColor: const Color(0xff181b23),
+      backgroundColor: accentColor,
       context: context,
       builder: (BuildContext context) {
         return Container(
@@ -138,6 +143,11 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
                   icon: Icons.indeterminate_check_box_sharp,
                   iconPath: "assets/img/reorder.svg",
                   value: 3),
+              TypeSelectButton("Number line",
+                  callback: typeSelectCallback,
+                  icon: Icons.indeterminate_check_box_sharp,
+                  iconPath: "assets/img/reorder.svg",
+                  value: 4),
             ],
           ),
         );
@@ -172,7 +182,7 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
                 color: Colors.white,
               ),
             ),
-            backgroundColor: const Color(0xff181b23),
+            backgroundColor: accentColor,
             actions: [
               TextButton(
                 onPressed: () async {
@@ -258,7 +268,7 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
           },
           icon: const Icon(Icons.arrow_back),
         ),
-        backgroundColor: const Color(0xff181b23),
+        backgroundColor: accentColor,
         foregroundColor: Colors.white,
       ),
       body: Padding(
@@ -536,7 +546,7 @@ class _SingleChoiceOptionsState extends State<SingleChoiceOptions> {
                       decoration: const BoxDecoration(
                         border: DashedBorder.fromBorderSide(
                             side: BorderSide(
-                              color: Color(0xff181b23),
+                              color: accentColor,
                               width: 4,
                             ),
                             dashLength: 10),
@@ -554,7 +564,7 @@ class _SingleChoiceOptionsState extends State<SingleChoiceOptions> {
                         ),
                         icon: const Icon(
                           Icons.add,
-                          color: Color(0xff181b23),
+                          color: accentColor,
                           size: 60,
                         ),
                       ),
@@ -656,7 +666,7 @@ class _MultipleChoiceOptionsState extends State<MultipleChoiceOptions> {
                       decoration: const BoxDecoration(
                         border: DashedBorder.fromBorderSide(
                             side: BorderSide(
-                              color: Color(0xff181b23),
+                              color: accentColor,
                               width: 4,
                             ),
                             dashLength: 10),
@@ -674,7 +684,7 @@ class _MultipleChoiceOptionsState extends State<MultipleChoiceOptions> {
                         ),
                         icon: const Icon(
                           Icons.add,
-                          color: Color(0xff181b23),
+                          color: accentColor,
                           size: 60,
                         ),
                       ),
@@ -808,7 +818,7 @@ class _ReorderOptionsState extends State<ReorderOptions> {
                 decoration: const BoxDecoration(
                   border: DashedBorder.fromBorderSide(
                       side: BorderSide(
-                        color: Color(0xff181b23),
+                        color: accentColor,
                         width: 4,
                       ),
                       dashLength: 10),
@@ -828,12 +838,104 @@ class _ReorderOptionsState extends State<ReorderOptions> {
                   ),
                   icon: const Icon(
                     Icons.add,
-                    color: Color(0xff181b23),
+                    color: accentColor,
                     size: 30,
                   ),
                 ),
               )
             : const SizedBox(),
+      ],
+    );
+  }
+}
+
+class NumberLine extends StatefulWidget {
+  const NumberLine({
+    super.key,
+    required this.question,
+    required this.updater,
+  });
+
+  final Question question;
+  final Future<void> Function() updater;
+
+  @override
+  State<NumberLine> createState() => _NumberLineState();
+}
+
+class _NumberLineState extends State<NumberLine> {
+  double sliderValue = 0;
+  double sliderMin = 0;
+  double sliderMax = 10;
+  double sliderStep = 4.5;
+
+  TextEditingController minController = TextEditingController();
+  TextEditingController maxController = TextEditingController();
+  TextEditingController stepController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    int? divisions =
+        sliderStep == 0 ? null : ((sliderMax - sliderMin) / sliderStep).round();
+    if (divisions != null &&
+        divisions != (sliderMax - sliderMin) / sliderStep) {
+      setState(() {
+        sliderMax = ((sliderMax - sliderMin) / sliderStep).ceil() * sliderStep;
+      });
+    }
+
+    return Column(
+      children: [
+        TextField(
+          controller: minController,
+          decoration: const InputDecoration(
+            labelText: "Slider minimum",
+            labelStyle: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+          keyboardType: TextInputType.number,
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 15.0,
+            trackShape: const RoundedRectSliderTrackShape(),
+            activeTrackColor: colors[1],
+            inactiveTrackColor: Colors.transparent,
+            thumbShape: const RoundSliderThumbShape(
+              enabledThumbRadius: 14,
+            ),
+            thumbColor: Colors.white,
+            overlayColor: Colors.white.withOpacity(0.1),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 10.0),
+            tickMarkShape: const RoundSliderTickMarkShape(),
+            activeTickMarkColor: invertColor(accentColor),
+            inactiveTickMarkColor: invertColor(accentColor).withOpacity(0.2),
+            valueIndicatorShape: const RectangularSliderValueIndicatorShape(),
+            valueIndicatorColor: Colors.grey.shade900,
+            valueIndicatorTextStyle: const TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+            ),
+          ),
+          child: Slider(
+            value: sliderValue,
+            min: sliderMin,
+            max: sliderMax,
+            divisions: divisions,
+            label: sliderValue.toStringAsFixed(1),
+            onChanged: (value) {
+              setState(() {
+                sliderValue = value;
+              });
+              widget.question.answer = value.toStringAsFixed(1);
+              widget.updater();
+            },
+          ),
+        ),
       ],
     );
   }

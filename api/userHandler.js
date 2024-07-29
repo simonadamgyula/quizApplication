@@ -11,13 +11,10 @@ export function userHandler(req, res, url) {
                 getUsernameHandler(req, res, body);
                 break;
             case "login":
-                loginHandler(req, res);
-                break;
-            case "login":
-                loginHandler(req, res);
+                loginHandler(req, res, body);
                 break;
             case "register":
-                registerHandler(req, res);
+                registerHandler(req, res, body);
                 break;
             case "logout":
                 logoutHandler(req, res);

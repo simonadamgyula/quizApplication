@@ -79,7 +79,7 @@ class _QuestionPageState extends State<QuestionPage> {
     return Scaffold(
       backgroundColor: const Color(0xff000000),
       appBar: AppBar(
-        backgroundColor: const Color(0xff181b23),
+        backgroundColor: accentColor,
         foregroundColor: Colors.white,
         title: Text(
           widget.quiz.name,

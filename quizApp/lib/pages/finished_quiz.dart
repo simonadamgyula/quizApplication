@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../authentication.dart';
+import '../colors.dart';
 import '../detailed_answers.dart';
 import '../quiz.dart';
 
@@ -37,7 +38,7 @@ class FinishedQuizPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: const Color(0xff181b23),
+        backgroundColor: accentColor,
         foregroundColor: Colors.white,
         title: Text(
           quiz.name,

@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api.dart';
 import '../authentication.dart';
+import '../colors.dart';
 import '../quiz.dart';
 import 'login.dart';
 
@@ -99,7 +100,7 @@ class _HomePageState extends State<HomePage> {
       builder: (BuildContext context) {
         return SimpleDialog(
           contentPadding: const EdgeInsets.all(20),
-          backgroundColor: const Color(0xff181b23),
+          backgroundColor: accentColor,
           title: const Text(
             "Fill out quiz",
             style: TextStyle(
@@ -208,7 +209,7 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         backgroundColor: const Color(0xff000000),
         appBar: AppBar(
-          backgroundColor: const Color(0xff181b23),
+          backgroundColor: accentColor,
           title: Text(
             widget.title,
             style: const TextStyle(color: Colors.white),
@@ -503,7 +504,7 @@ class QuizPreview extends StatelessWidget {
         margin: const EdgeInsets.all(4),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xff181b23),
+          color: accentColor,
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(

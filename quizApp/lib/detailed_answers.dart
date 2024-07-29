@@ -90,7 +90,7 @@ class DetailedAnswers extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(10).add(const EdgeInsets.only(top: 30)),
       decoration: BoxDecoration(
-        color: const Color(0xff181b23),
+        color: accentColor,
         borderRadius: BorderRadius.circular(15),
       ),
       child: Column(
