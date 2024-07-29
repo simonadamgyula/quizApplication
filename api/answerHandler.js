@@ -129,15 +129,7 @@ async function validateAnswers(quiz_id, answers) {
     for (let i = 0; i < questions.length; i++) {
         const question = questions[i];
         const options = JSON.parse(question.options);
-        const answer = answers[question.id.toString()];
-
-        if (!answer) {
-            scores.push(0);
-
-            details[question.id] = null;
-
-            continue;
-        }
+        const answer = answers[question.id.toString()] ?? "";
 
         switch (parseInt(question.type)) {
             case 0:
@@ -163,8 +155,12 @@ async function validateAnswers(quiz_id, answers) {
                 break;
             case 3:
                 var score = 0;
+
+                const split_answers = answer.split(",");
+                const split_correct = question.answer.split(",");
+
                 for (let j = 0; j < options.length; j++) {
-                    if (options[j] === question.answer.split(",")[j]) {
+                    if (split_answers[j] === split_correct[j]) {
                         score++;
                     }
                 }
@@ -176,6 +172,17 @@ async function validateAnswers(quiz_id, answers) {
                 break;
             case 4:
                 scores.push(answer === question.answer ? 1 : 0);
+                if (answer === question.answer) {
+                    details[question.id] = [
+                        [answer],
+                        [[true, true]]
+                    ]
+                } else {
+                    details[question.id] = [
+                        [answer, question.answer],
+                        [[true, false], [false, true]]
+                    ]
+                }
                 break;
             case 5:
                 multiAnswerValidate(answer, question);

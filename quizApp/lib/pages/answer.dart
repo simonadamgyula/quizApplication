@@ -84,7 +84,7 @@ class AnswerPage extends StatelessWidget {
                   ]),
             ),
             Text(
-              "${((answer.scoreEarned / quiz.maxPoints) * 100).toString().replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")}%",
+              "${((answer.scoreEarned / quiz.maxPoints) * 100).toStringAsFixed(1).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")}%",
               style: const TextStyle(
                 color: Colors.grey,
                 fontSize: 25,

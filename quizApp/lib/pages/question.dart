@@ -96,7 +96,13 @@ class _QuestionPageState extends State<QuestionPage> {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text("Confirm quit"),
+                backgroundColor: accentColor,
+                title: const Text(
+                  "Confirm quit",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
                 content: const Text(
                   "Are you sure you want to quit?\n(This will submit your answers)",
                   style: TextStyle(
@@ -106,6 +112,7 @@ class _QuestionPageState extends State<QuestionPage> {
                 actions: [
                   TextButton(
                     onPressed: () {
+                      Navigator.pop(context);
                       endQuiz();
                     },
                     child: const Text(
@@ -139,7 +146,7 @@ class _QuestionPageState extends State<QuestionPage> {
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.only(
@@ -178,8 +185,9 @@ class _QuestionPageState extends State<QuestionPage> {
                 );
               },
               icon: const Icon(
-                Icons.arrow_right,
+                Icons.arrow_right_alt,
                 color: Colors.white,
+                size: 40,
               ),
             )
           ],
@@ -472,42 +480,81 @@ class _NumberLineQuestionState extends State<NumberLineQuestion> {
     int? divisions =
         sliderStep == 0 ? null : ((sliderMax - sliderMin) / sliderStep).round();
 
-    return SliderTheme(
-      data: SliderTheme.of(context).copyWith(
-        trackHeight: 15.0,
-        trackShape: const RoundedRectSliderTrackShape(),
-        activeTrackColor: colors[1],
-        inactiveTrackColor: accentColor,
-        thumbShape: const RoundSliderThumbShape(
-          enabledThumbRadius: 14,
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 15.0,
+                trackShape: const RoundedRectSliderTrackShape(),
+                activeTrackColor: colors[1],
+                inactiveTrackColor: accentColor,
+                thumbShape: const RoundSliderThumbShape(
+                  enabledThumbRadius: 14,
+                ),
+                thumbColor: Colors.white,
+                overlayColor: Colors.white.withOpacity(0.1),
+                overlayShape:
+                    const RoundSliderOverlayShape(overlayRadius: 10.0),
+                tickMarkShape:
+                    const RoundSliderTickMarkShape(tickMarkRadius: 4),
+                activeTickMarkColor: invertColor(accentColor),
+                inactiveTickMarkColor:
+                    invertColor(accentColor).withOpacity(0.2),
+                valueIndicatorShape:
+                    const RectangularSliderValueIndicatorShape(),
+                valueIndicatorColor: Colors.grey.shade900,
+                valueIndicatorTextStyle: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.0,
+                ),
+              ),
+              child: Slider(
+                value: sliderValue,
+                min: sliderMin,
+                max: sliderMax,
+                divisions: divisions,
+                label: sliderValue
+                    .toStringAsFixed(1)
+                    .replaceAll(RegExp(r'([.]*0)(?!.*\d)'), ""),
+                onChanged: (value) {
+                  setState(() {
+                    sliderValue = value;
+                  });
+                },
+                onChangeEnd: (value) {
+                  widget.callback(value.toStringAsFixed(1));
+                },
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(top: 60),
+              padding: const EdgeInsets.symmetric(
+                vertical: 10,
+                horizontal: 20,
+              ),
+              decoration: BoxDecoration(
+                  border: Border.all(
+                    color: accentColor,
+                    width: 4,
+                  ),
+                  borderRadius: BorderRadius.circular(10)),
+              child: Text(
+                sliderValue
+                    .toStringAsFixed(1)
+                    .replaceAll(RegExp(r'([.]*0)(?!.*\d)'), ""),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            )
+          ],
         ),
-        thumbColor: Colors.white,
-        overlayColor: Colors.white.withOpacity(0.1),
-        overlayShape: const RoundSliderOverlayShape(overlayRadius: 10.0),
-        tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
-        activeTickMarkColor: invertColor(accentColor),
-        inactiveTickMarkColor: invertColor(accentColor).withOpacity(0.2),
-        valueIndicatorShape: const RectangularSliderValueIndicatorShape(),
-        valueIndicatorColor: Colors.grey.shade900,
-        valueIndicatorTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 20.0,
-        ),
-      ),
-      child: Slider(
-        value: sliderValue,
-        min: sliderMin,
-        max: sliderMax,
-        divisions: divisions,
-        label: sliderValue.toStringAsFixed(1),
-        onChanged: (value) {
-          setState(() {
-            sliderValue = value;
-          });
-        },
-        onChangeEnd: (value) {
-          widget.callback(value.toStringAsFixed(1));
-        },
       ),
     );
   }

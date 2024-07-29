@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:quim/quiz.dart';
 import 'package:flutter/material.dart';
 
@@ -47,6 +49,7 @@ class DetailedAnswers extends StatelessWidget {
             detail[0].asMap().entries.map<Widget>((entry) {
               final option = entry.value;
               final index = entry.key;
+
               final [correct, selected] = detail[1][index];
 
               return detailOption(option, index, correct, selected);
@@ -87,6 +90,8 @@ class DetailedAnswers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    log(details.toString());
+
     return Container(
       margin: const EdgeInsets.all(10).add(const EdgeInsets.only(top: 30)),
       decoration: BoxDecoration(

@@ -46,12 +46,15 @@ class _QuizEditPageState extends State<QuizEditPage> {
       switch (question.type) {
         case 0:
         case 1:
+        case 4:
           maxScore++;
           break;
         case 2:
           maxScore += question.answer?.split(",").length ?? 0;
+          break;
         case 3:
           maxScore += question.options.length;
+          break;
       }
     }
 

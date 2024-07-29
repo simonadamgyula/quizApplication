@@ -223,7 +223,7 @@ class _AnswerPreviewState extends State<AnswerPreview> {
                         fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    "${((widget.answer.scoreEarned / widget.quiz.maxPoints) * 100).toString().replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")}%",
+                    "${((widget.answer.scoreEarned / widget.quiz.maxPoints) * 100).toStringAsFixed(1).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")}%",
                     style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 12,

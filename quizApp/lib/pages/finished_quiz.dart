@@ -61,6 +61,8 @@ class FinishedQuizPage extends StatelessWidget {
               final scoreEarned = data["score"];
               final details = data["details"];
 
+              final scoreString = scoreEarned.toString().replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "");
+
               log(details.toString());
 
               return Expanded(
@@ -81,7 +83,7 @@ class FinishedQuizPage extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "${scoreEarned.toString().replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")} / ${quiz.maxPoints}",
+                          "${scoreString == "" ? "0" : scoreString} / ${quiz.maxPoints}",
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 40,
@@ -89,7 +91,7 @@ class FinishedQuizPage extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "${((scoreEarned / quiz.maxPoints) * 100).toString().replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")}%",
+                          "${((scoreEarned / quiz.maxPoints) * 100).toStringAsFixed(1).replaceAll(RegExp(r'([.]*0)(?!.*\d)'), "")}%",
                           style: const TextStyle(
                             color: CupertinoColors.systemGrey,
                             fontSize: 35,

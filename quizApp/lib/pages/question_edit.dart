@@ -1021,11 +1021,15 @@ class _NumberLineState extends State<NumberLine> {
                 ),
                 thumbColor: Colors.white,
                 overlayColor: Colors.white.withOpacity(0.1),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 10.0),
-                tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
+                overlayShape:
+                    const RoundSliderOverlayShape(overlayRadius: 10.0),
+                tickMarkShape:
+                    const RoundSliderTickMarkShape(tickMarkRadius: 4),
                 activeTickMarkColor: invertColor(accentColor),
-                inactiveTickMarkColor: invertColor(accentColor).withOpacity(0.2),
-                valueIndicatorShape: const RectangularSliderValueIndicatorShape(),
+                inactiveTickMarkColor:
+                    invertColor(accentColor).withOpacity(0.2),
+                valueIndicatorShape:
+                    const RectangularSliderValueIndicatorShape(),
                 valueIndicatorColor: Colors.grey.shade900,
                 valueIndicatorTextStyle: const TextStyle(
                   color: Colors.white,
@@ -1037,7 +1041,9 @@ class _NumberLineState extends State<NumberLine> {
                 min: sliderMin,
                 max: sliderMax,
                 divisions: divisions,
-                label: sliderValue.toStringAsFixed(1),
+                label: sliderValue
+                    .toStringAsFixed(1)
+                    .replaceAll(RegExp(r'([.]*0)(?!.*\d)'), ""),
                 onChanged: (value) {
                   setState(() {
                     sliderValue = value;
