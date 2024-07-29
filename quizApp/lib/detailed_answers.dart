@@ -1,7 +1,7 @@
 import 'package:quim/quiz.dart';
 import 'package:flutter/material.dart';
 
-import 'colors.dart';
+import 'style.dart';
 
 class DetailedAnswers extends StatelessWidget {
   const DetailedAnswers({

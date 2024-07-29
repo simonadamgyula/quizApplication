@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../authentication.dart';
-import '../colors.dart';
+import '../style.dart';
 import '../detailed_answers.dart';
 import '../quiz.dart';
 

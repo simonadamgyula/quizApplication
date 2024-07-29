@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
@@ -9,7 +10,7 @@ import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
 
 import '../api.dart';
 import '../authentication.dart';
-import '../colors.dart';
+import '../style.dart';
 import '../quiz.dart';
 
 const Map<int, String> typeToIcon = {
@@ -56,6 +57,10 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
   }
 
   void typeSelectCallback(int value) {
+    if (value == 4 || widget.question.type == 4) {
+      widget.question.options = [];
+      widget.question.answer = "";
+    }
     widget.question.type = value;
     setState(() {
       type = value;
@@ -237,6 +242,7 @@ class _QuestionEditPageState extends State<QuestionEditPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text(
@@ -866,17 +872,72 @@ class NumberLine extends StatefulWidget {
 class _NumberLineState extends State<NumberLine> {
   double sliderValue = 0;
   double sliderMin = 0;
-  double sliderMax = 10;
-  double sliderStep = 4.5;
+  double sliderMax = 100;
+  double sliderStep = 10;
 
   TextEditingController minController = TextEditingController();
   TextEditingController maxController = TextEditingController();
   TextEditingController stepController = TextEditingController();
 
+  void settingsListener() {
+    setState(() {
+      final sliderMinTemp = double.tryParse(minController.text) ?? 0;
+      final sliderMaxTemp = double.tryParse(maxController.text) ?? 100;
+      if (sliderMinTemp < sliderMaxTemp) {
+        sliderMin = sliderMinTemp;
+        sliderMax = sliderMaxTemp;
+      }
+      sliderStep = double.tryParse(stepController.text) ?? 10;
+
+      if (sliderValue < sliderMin) {
+        sliderValue = sliderMin;
+      }
+      if (sliderValue > sliderMax) {
+        sliderValue = sliderMax;
+      }
+    });
+
+    widget.question.options = [
+      sliderMin.toStringAsFixed(1),
+      sliderMax.toStringAsFixed(1),
+      sliderStep.toStringAsFixed(1),
+    ];
+  }
+
+  @override
+  void initState() {
+    if (widget.question.options.length == 3) {
+      minController.text = widget.question.options[0];
+      maxController.text = widget.question.options[1];
+      stepController.text = widget.question.options[2];
+    } else {
+      minController.text = "0";
+      maxController.text = "100";
+      stepController.text = "10";
+    }
+
+    minController.addListener(settingsListener);
+    maxController.addListener(settingsListener);
+    stepController.addListener(settingsListener);
+
+    settingsListener();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    minController.dispose();
+    maxController.dispose();
+    stepController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     int? divisions =
         sliderStep == 0 ? null : ((sliderMax - sliderMin) / sliderStep).round();
+    divisions = divisions == 0 ? null : divisions;
+
     if (divisions != null &&
         divisions != (sliderMax - sliderMin) / sliderStep) {
       setState(() {
@@ -884,59 +945,113 @@ class _NumberLineState extends State<NumberLine> {
       });
     }
 
-    return Column(
-      children: [
-        TextField(
-          controller: minController,
-          decoration: const InputDecoration(
-            labelText: "Slider minimum",
-            labelStyle: TextStyle(
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          TextField(
+            controller: minController,
+            decoration: InputDecoration(
+              labelText: "Slider minimum",
+              labelStyle: const TextStyle(
+                color: Colors.white,
+              ),
+              border: inputBorder,
+              focusedBorder: inputBorder,
+              enabledBorder: inputBorder,
+            ),
+            keyboardType: TextInputType.number,
+            style: const TextStyle(
               color: Colors.white,
             ),
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d?'))
+            ],
           ),
-          keyboardType: TextInputType.number,
-          style: const TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        SliderTheme(
-          data: SliderTheme.of(context).copyWith(
-            trackHeight: 15.0,
-            trackShape: const RoundedRectSliderTrackShape(),
-            activeTrackColor: colors[1],
-            inactiveTrackColor: Colors.transparent,
-            thumbShape: const RoundSliderThumbShape(
-              enabledThumbRadius: 14,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: TextField(
+              controller: maxController,
+              decoration: InputDecoration(
+                labelText: "Slider maximum",
+                labelStyle: const TextStyle(
+                  color: Colors.white,
+                ),
+                border: inputBorder,
+                focusedBorder: inputBorder,
+                enabledBorder: inputBorder,
+              ),
+              keyboardType: TextInputType.number,
+              style: const TextStyle(
+                color: Colors.white,
+              ),
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d?'))
+              ],
             ),
-            thumbColor: Colors.white,
-            overlayColor: Colors.white.withOpacity(0.1),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 10.0),
-            tickMarkShape: const RoundSliderTickMarkShape(),
-            activeTickMarkColor: invertColor(accentColor),
-            inactiveTickMarkColor: invertColor(accentColor).withOpacity(0.2),
-            valueIndicatorShape: const RectangularSliderValueIndicatorShape(),
-            valueIndicatorColor: Colors.grey.shade900,
-            valueIndicatorTextStyle: const TextStyle(
+          ),
+          TextField(
+            controller: stepController,
+            decoration: InputDecoration(
+              labelText: "Slider step",
+              labelStyle: const TextStyle(
+                color: Colors.white,
+              ),
+              border: inputBorder,
+              focusedBorder: inputBorder,
+              enabledBorder: inputBorder,
+            ),
+            keyboardType: TextInputType.number,
+            style: const TextStyle(
               color: Colors.white,
-              fontSize: 20.0,
+            ),
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.allow(RegExp(r'^(\d+)?\.?\d?'))
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 40),
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 15.0,
+                trackShape: const RoundedRectSliderTrackShape(),
+                activeTrackColor: colors[1],
+                inactiveTrackColor: accentColor,
+                thumbShape: const RoundSliderThumbShape(
+                  enabledThumbRadius: 14,
+                ),
+                thumbColor: Colors.white,
+                overlayColor: Colors.white.withOpacity(0.1),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 10.0),
+                tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
+                activeTickMarkColor: invertColor(accentColor),
+                inactiveTickMarkColor: invertColor(accentColor).withOpacity(0.2),
+                valueIndicatorShape: const RectangularSliderValueIndicatorShape(),
+                valueIndicatorColor: Colors.grey.shade900,
+                valueIndicatorTextStyle: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.0,
+                ),
+              ),
+              child: Slider(
+                value: sliderValue,
+                min: sliderMin,
+                max: sliderMax,
+                divisions: divisions,
+                label: sliderValue.toStringAsFixed(1),
+                onChanged: (value) {
+                  setState(() {
+                    sliderValue = value;
+                  });
+                  widget.question.answer = value.toStringAsFixed(1);
+                },
+                onChangeEnd: (_) {
+                  widget.updater();
+                },
+              ),
             ),
           ),
-          child: Slider(
-            value: sliderValue,
-            min: sliderMin,
-            max: sliderMax,
-            divisions: divisions,
-            label: sliderValue.toStringAsFixed(1),
-            onChanged: (value) {
-              setState(() {
-                sliderValue = value;
-              });
-              widget.question.answer = value.toStringAsFixed(1);
-              widget.updater();
-            },
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

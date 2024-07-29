@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../api.dart';
 import '../authentication.dart';
-import '../colors.dart';
+import '../style.dart';
 
 class QuizAddPage extends StatelessWidget {
   const QuizAddPage({super.key});

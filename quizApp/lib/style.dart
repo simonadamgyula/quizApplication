@@ -12,4 +12,13 @@ const List<Color> colors = [
 const Color backgroundColor = Color(0x00000000);
 const Color accentColor = Color(0xff181b23);
 
-Color invertColor(Color color) => Color.fromARGB(color.alpha, 255 - color.red, 255 - color.green, 255 - color.blue);
+Color invertColor(Color color) => Color.fromARGB(
+    color.alpha, 255 - color.red, 255 - color.green, 255 - color.blue);
+
+OutlineInputBorder inputBorder = OutlineInputBorder(
+  borderSide: const BorderSide(
+    color: accentColor,
+    width: 2,
+  ),
+  borderRadius: BorderRadius.circular(10),
+);

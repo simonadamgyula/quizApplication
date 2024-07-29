@@ -10,7 +10,7 @@ import 'package:mobkit_dashed_border/mobkit_dashed_border.dart';
 
 import '../api.dart';
 import '../authentication.dart';
-import '../colors.dart';
+import '../style.dart';
 import '../quiz.dart';
 import 'answers.dart';
 

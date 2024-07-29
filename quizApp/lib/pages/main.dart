@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../api.dart';
 import '../authentication.dart';
-import '../colors.dart';
+import '../style.dart';
 import '../quiz.dart';
 import 'login.dart';
 

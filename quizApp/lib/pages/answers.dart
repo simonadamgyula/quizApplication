@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:quim/pages/answer.dart';
 
 import '../authentication.dart';
-import '../colors.dart';
+import '../style.dart';
 import '../quiz.dart';
 
 class AnswersPage extends StatefulWidget {

@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import '../colors.dart';
+import '../style.dart';
 import '../quiz.dart';
 import 'finished_quiz.dart';
 
@@ -31,7 +31,9 @@ class _QuestionPageState extends State<QuestionPage> {
   @override
   void initState() {
     options = widget.question.options;
-    options.shuffle();
+    if (widget.question.type != 4) {
+      options.shuffle();
+    }
     super.initState();
   }
 
@@ -55,6 +57,10 @@ class _QuestionPageState extends State<QuestionPage> {
           callback: callback,
         ),
       3 => ReorderQuestion(
+          options: options,
+          callback: callback,
+        ),
+      4 => NumberLineQuestion(
           options: options,
           callback: callback,
         ),
@@ -423,6 +429,85 @@ class _ReorderQuestionState extends State<ReorderQuestion> {
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+}
+
+class NumberLineQuestion extends StatefulWidget {
+  const NumberLineQuestion({
+    super.key,
+    required this.options,
+    required this.callback,
+  });
+
+  final List<String> options;
+  final void Function(String) callback;
+
+  @override
+  State<NumberLineQuestion> createState() => _NumberLineQuestionState();
+}
+
+class _NumberLineQuestionState extends State<NumberLineQuestion> {
+  double sliderValue = 0;
+
+  double sliderMin = 0;
+  double sliderMax = 0;
+  double sliderStep = 0;
+
+  @override
+  void initState() {
+    log(widget.options.toString());
+    sliderMin = double.parse(widget.options[0]);
+    sliderMax = double.parse(widget.options[1]);
+    sliderStep = double.parse(widget.options[2]);
+    setState(() {
+      sliderValue = sliderMin;
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    int? divisions =
+        sliderStep == 0 ? null : ((sliderMax - sliderMin) / sliderStep).round();
+
+    return SliderTheme(
+      data: SliderTheme.of(context).copyWith(
+        trackHeight: 15.0,
+        trackShape: const RoundedRectSliderTrackShape(),
+        activeTrackColor: colors[1],
+        inactiveTrackColor: accentColor,
+        thumbShape: const RoundSliderThumbShape(
+          enabledThumbRadius: 14,
+        ),
+        thumbColor: Colors.white,
+        overlayColor: Colors.white.withOpacity(0.1),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 10.0),
+        tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
+        activeTickMarkColor: invertColor(accentColor),
+        inactiveTickMarkColor: invertColor(accentColor).withOpacity(0.2),
+        valueIndicatorShape: const RectangularSliderValueIndicatorShape(),
+        valueIndicatorColor: Colors.grey.shade900,
+        valueIndicatorTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20.0,
+        ),
+      ),
+      child: Slider(
+        value: sliderValue,
+        min: sliderMin,
+        max: sliderMax,
+        divisions: divisions,
+        label: sliderValue.toStringAsFixed(1),
+        onChanged: (value) {
+          setState(() {
+            sliderValue = value;
+          });
+        },
+        onChangeEnd: (value) {
+          widget.callback(value.toStringAsFixed(1));
+        },
       ),
     );
   }
