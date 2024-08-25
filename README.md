@@ -1,8 +1,8 @@
 # Quim
 
-An android quiz app. (that is poorly made, and not even finished yet)
+An android quiz app made in flutter. Unfortunately I cannot host the api, so if you want to try it you have to run it yourself.
 
-## Usage
+## Installation
 ### Api
 1. Create a supabase project. You can use the `database.sql` file for setting up the database.
 2. Write your Supabase API key (anon) with the variable name ``` ANON ```.
