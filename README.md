@@ -1,5 +1,9 @@
 # Quim
 
+![Screenshot 1](https://github.com/simonadamgyula/quizApplication/blob/1eba4c4d50771f8b817d8edbd74379c7c3219d7c/screenshots/Screenshot_2024-07-29-22-27-22-471_com.example.quiz_app-edit.jpg)
+![Screenshot 2](https://github.com/simonadamgyula/quizApplication/blob/1eba4c4d50771f8b817d8edbd74379c7c3219d7c/screenshots/Screenshot_2024-07-29-22-28-03-843_com.example.quiz_app-edit.jpg)
+![Screenshot 3](https://github.com/simonadamgyula/quizApplication/blob/1eba4c4d50771f8b817d8edbd74379c7c3219d7c/screenshots/Screenshot_2024-07-29-22-28-45-786_com.example.quiz_app-edit.jpg)
+
 An android quiz app made in flutter. Unfortunately I cannot host the api, so if you want to try it you have to run it yourself.
 
 ## Installation
